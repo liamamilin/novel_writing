@@ -3,16 +3,17 @@ import yaml
 from pathlib import Path
 
 from novel_runtime.agents.chapter_planner import ChapterPlannerAgent, ChapterPlanResult
-from novel_runtime.agents.chapter_writer import ChapterWriterAgent, ChapterWriteResult
+from novel_runtime.agents.chapter_writer import ChapterWriterAgent, ChapterWriteResult, ChapterWriterOutputResult
 from novel_runtime.agents.narrative_polisher import NarrativePolisherAgent
 from novel_runtime.compiler.plan_validator import PlanValidator
 from novel_runtime.exceptions import ChapterNotFoundError, InvalidStateTransitionError, StyleNotSetError
 from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.llm.prompt_loader import PromptLoader
 from novel_runtime.models.style import StyleAsset
+from novel_runtime.models.chapter import AgentContract
 from novel_runtime.services.project_service import ProjectService
 from novel_runtime.storage import strategy_storage, style_storage, state_storage
-from novel_runtime.storage.chapter_storage import save_chapter_file, load_chapter_file, save_draft_version
+from novel_runtime.storage.chapter_storage import save_chapter_file, load_chapter_file, save_draft_version, mark_reviews_stale
 from novel_runtime.storage.project_storage import ProjectStorage
 from novel_runtime.services.context_service import ContextService
 
@@ -135,18 +136,7 @@ class ChapterService:
         all_voices = voices + style_storage.list_character_voices(project_path)
         unique_voices = {v.voice_id: v for v in all_voices}.values() if all_voices else []
 
-        from novel_runtime.models.chapter import AgentContract
-        contract = AgentContract()
-        if "## Agent Contract" in chapter_plan:
-            plan_section = chapter_plan.split("## Agent Contract")[1].split("##")[0] if "## Agent Contract" in chapter_plan else ""
-            for line in plan_section.split("\n"):
-                line = line.strip()
-                if line.startswith("- ") or line.startswith("* "):
-                    content = line.lstrip("- *").strip()
-                    if "约束" in content or "不得" in content or "字数" in content:
-                        contract.constraints.append(content)
-                    else:
-                        contract.promises.append(content)
+        contract = self._extract_contract(chapter_plan)
 
         result = self._writer.write(context_pack, chapter_plan, style, list(unique_voices), contract)
         if not result.success:
@@ -217,3 +207,64 @@ class ChapterService:
         ProjectStorage(self.project_service.storage_base).save_chapter(project, chapter)
 
         return {"styled_draft_path": chapter.styled_draft_path}
+
+    def _extract_contract(self, chapter_plan: str) -> AgentContract:
+        contract = AgentContract()
+        if "## Agent Contract" in chapter_plan:
+            plan_section = chapter_plan.split("## Agent Contract")[1].split("##")[0] if "## Agent Contract" in chapter_plan else ""
+            for line in plan_section.split("\n"):
+                line = line.strip()
+                if line.startswith("- ") or line.startswith("* "):
+                    content = line.lstrip("- *").strip()
+                    if "约束" in content or "不得" in content or "字数" in content:
+                        contract.constraints.append(content)
+                    else:
+                        contract.promises.append(content)
+        return contract
+
+    def finalize_streamed_draft(self, project_id: str, chapter_number: int, full_text: str) -> dict:
+        """Deterministically finalize a streamed draft: parse annotations, check contract, save.
+
+        No LLM call — reuses process_output logic on the already-generated text."""
+        project = self.project_service.get_project(project_id)
+        project_path = self.project_service.get_project_path(project_id)
+        chapter = self.project_service.get_chapter(project_id, chapter_number)
+
+        if chapter.status != "planned":
+            raise InvalidStateTransitionError(
+                f"Chapter {chapter_number} is {chapter.status}, cannot finalize streamed draft"
+            )
+
+        try:
+            chapter_plan = load_chapter_file(project_path, chapter_number, "plan")
+        except FileNotFoundError:
+            chapter_plan = ""
+            contract = AgentContract()
+        else:
+            contract = self._extract_contract(chapter_plan)
+
+        parsed = self._writer.parse_output(full_text, contract)
+        if not parsed.success:
+            return {"draft_path": "", "state_annotations_path": "", "contract_check": {}, "errors": parsed.validation_errors}
+
+        chapter.draft_count += 1
+        current_draft_id = chapter.draft_count
+        save_draft_version(project_path, chapter_number, current_draft_id, parsed.draft)
+
+        chapter.active_draft_id = current_draft_id
+        chapter.draft_path = str(project_path / "chapters" / f"chapter_{chapter_number:03d}" / "drafts" / f"draft_v{current_draft_id}.md")
+        chapter.state_annotations_path = str(project_path / "chapters" / f"chapter_{chapter_number:03d}" / "state_annotations.yaml")
+
+        annotations_yaml = yaml.dump(parsed.annotations, allow_unicode=True, default_flow_style=False) if parsed.annotations else "{}"
+        save_chapter_file(project_path, chapter_number, "state_annotations", annotations_yaml)
+
+        chapter.status = "drafted"
+        ProjectStorage(self.project_service.storage_base).save_chapter(project, chapter)
+
+        return {
+            "draft_path": chapter.draft_path,
+            "state_annotations_path": chapter.state_annotations_path,
+            "contract_check": parsed.contract_check,
+            "draft_id": current_draft_id,
+            "draft_content": parsed.draft,
+        }

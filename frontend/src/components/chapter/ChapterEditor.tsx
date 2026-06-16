@@ -80,7 +80,11 @@ export function ChapterEditor() {
     setSaving(true);
     try {
       const res = await chaptersApi.saveContent(currentProject.project_id, currentChapter.chapter_number, content);
-      notify('已保存为草稿 v' + res.draft_id, 'success');
+      if (res.reviews_invalidated) {
+        notify('已保存 — 审查报告已失效，请重新审查', 'info');
+      } else {
+        notify('已保存为草稿 v' + res.draft_id, 'success');
+      }
       if (res.status !== currentChapter.status && currentProject) {
         await loadChapters(currentProject.project_id);
       }

@@ -84,6 +84,18 @@ def load_draft_version(project_path: Path, chapter_number: int, draft_id: int) -
     return read_md(file_path)
 
 
+def mark_reviews_stale(project_path: Path, chapter_number: int) -> None:
+    """Rename review_*.md → review_*.md.stale to mark them invalid after content edit."""
+    chapter_dir = _chapter_dir(project_path, chapter_number)
+    if not chapter_dir.exists():
+        return
+    for f in chapter_dir.iterdir():
+        if f.suffix == ".md" and f.stem.startswith("review_"):
+            stale_name = f.with_name(f.name + ".stale")
+            if not stale_name.exists():
+                f.rename(stale_name)
+
+
 def freeze_chapter(project_path: Path, chapter_number: int) -> None:
     chapter_dir = _chapter_dir(project_path, chapter_number)
     if not chapter_dir.exists():

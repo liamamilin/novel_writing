@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useParams, useSearchParams } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThreeColumnLayout } from './components/layout/ThreeColumnLayout';
 import { LeftPanel } from './components/layout/LeftPanel';
@@ -17,19 +17,39 @@ const queryClient = new QueryClient();
 
 function MainLayout() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
   const { notification, clearNotification } = useUIStore();
   const currentProject = useProjectStore((s) => s.currentProject);
   const selectProject = useProjectStore((s) => s.selectProject);
+  const selectAsset = useUIStore((s) => s.selectAsset);
   const [activityOpen, setActivityOpen] = useState(false);
 
   const clearChapters = useChapterStore((s) => s.clearChapters);
+  const chapters = useChapterStore((s) => s.chapters);
+  const setCurrentChapter = useChapterStore((s) => s.setCurrentChapter);
+  const loadProjects = useProjectStore((s) => s.loadProjects);
 
+  // B1 + N4: sync route param + load projects for left-panel dropdown
   useEffect(() => {
+    loadProjects();
     if (id && (!currentProject || currentProject.project_id !== id)) {
       clearChapters();
       selectProject(id);
     }
-  }, [id, currentProject, selectProject, clearChapters]);
+  }, [id, currentProject, selectProject, clearChapters, loadProjects]);
+
+  // N1: restore chapter/asset from URL query after chapters load
+  useEffect(() => {
+    if (!currentProject || chapters.length === 0) return;
+    const chParam = searchParams.get('ch');
+    if (chParam) {
+      const ch = chapters.find((c) => c.chapter_number === Number(chParam));
+      if (ch && (!useChapterStore.getState().currentChapter || useChapterStore.getState().currentChapter?.chapter_id !== ch.chapter_id)) {
+        setCurrentChapter(ch);
+        selectAsset({ type: 'chapter', id: ch.chapter_id });
+      }
+    }
+  }, [currentProject?.project_id, chapters.length]);
 
   return (
     <div>

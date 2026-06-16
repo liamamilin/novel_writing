@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useProjectStore } from '../../stores/projectStore';
 import { useChapterStore } from '../../stores/chapterStore';
 import { useUIStore } from '../../stores/uiStore';
+import { useStreamStore } from '../../stores/streamStore';
 import { chaptersApi } from '../../api/chapters';
 import { bibleApi } from '../../api/bible';
 
@@ -22,6 +24,8 @@ export function ChapterList() {
   const selectAsset = useUIStore((s) => s.selectAsset);
   const notify = useUIStore((s) => s.notify);
   const [creating, setCreating] = useState(false);
+  const [, setSearchParams] = useSearchParams();
+  const isStreaming = useStreamStore((s) => s.isStreaming);
 
   useEffect(() => {
     if (currentProject) {
@@ -82,8 +86,13 @@ export function ChapterList() {
           <button
             key={ch.chapter_id}
             onClick={() => {
+              if (isStreaming) {
+                notify('正在流式生成中，请等待完成后再切换', 'error');
+                return;
+              }
               setCurrentChapter(ch);
               selectAsset({ type: 'chapter', id: ch.chapter_id });
+              setSearchParams({ ch: String(ch.chapter_number), asset: 'chapter' });
             }}
             className={`w-full text-left px-3 py-1.5 text-sm rounded hover:bg-gray-100 transition-colors flex items-center justify-between ${
               currentChapter?.chapter_id === ch.chapter_id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'

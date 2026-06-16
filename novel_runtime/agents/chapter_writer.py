@@ -14,6 +14,15 @@ class ChapterWriteResult:
         self.contract_check = contract_check
 
 
+class ChapterWriterOutputResult:
+    def __init__(self, draft: str, annotations: dict, contract_check: dict, validation_errors: list[str] | None = None):
+        self.draft = draft
+        self.annotations = annotations
+        self.contract_check = contract_check
+        self.validation_errors = validation_errors or []
+        self.success = len(self.validation_errors) == 0
+
+
 class ChapterWriterAgent(BaseAgent):
     def get_prompt_template(self) -> str:
         return "chapter_write"
@@ -74,6 +83,41 @@ class ChapterWriterAgent(BaseAgent):
 
         result = ChapterWriteResult(draft, annotations, contract_check)
         return AgentResult(success=True, data=result, raw_output=raw_output)
+
+    def parse_output(self, raw_output: str, contract: AgentContract | None = None) -> ChapterWriterOutputResult:
+        """Deterministically parse raw LLM output into draft + annotations + contract check.
+
+        This method does NOT call the LLM. It extracts the draft body, YAML annotations,
+        and runs contract verification on the existing text.
+        """
+        errors = self.validate_composite(raw_output)
+        if errors:
+            return ChapterWriterOutputResult(draft=raw_output, annotations={}, contract_check={}, validation_errors=errors)
+
+        parts = raw_output.split("---ANNOTATIONS---")
+        draft = parts[0].strip() if parts else raw_output
+
+        annotations = {}
+        if len(parts) > 1:
+            try:
+                annotations = yaml.safe_load(parts[1]) or {}
+            except Exception:
+                annotations = {}
+
+        contract_check = {"promises_fulfilled": [], "constraints_followed": [], "all_fulfilled": False}
+        if contract:
+            contract_check["promises_fulfilled"] = [
+                p[:30] in draft for p in contract.promises
+            ] if contract.promises else []
+            contract_check["constraints_followed"] = [
+                c[:30] in draft for c in contract.constraints
+            ] if contract.constraints else []
+            contract_check["all_fulfilled"] = (
+                all(contract_check["promises_fulfilled"]) and
+                all(contract_check["constraints_followed"])
+            )
+
+        return ChapterWriterOutputResult(draft=draft, annotations=annotations, contract_check=contract_check)
 
     def write(
         self,

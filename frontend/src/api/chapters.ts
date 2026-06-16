@@ -49,7 +49,7 @@ export const chaptersApi = {
   getContent: (pid: string, ch: number) =>
     api.get<{ content: string; source: string; draft_id?: number }>(`/projects/${pid}/chapters/${ch}/content`),
   saveContent: (pid: string, ch: number, content: string) =>
-    api.post<{ draft_id: number; draft_count: number; status: string }>(`/projects/${pid}/chapters/${ch}/content`, {
+    api.post<{ draft_id: number; draft_count: number; status: string; reviews_invalidated?: boolean }>(`/projects/${pid}/chapters/${ch}/content`, {
       content,
     }),
 };

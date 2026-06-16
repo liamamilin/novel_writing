@@ -163,18 +163,12 @@ async def generate_draft_stream(
                 full_text += chunk
                 yield f"data: {json_mod.dumps({'token': chunk})}\n\n"
 
-            # auto-save draft on successful completion
-            from novel_runtime.storage.chapter_storage import save_draft_version
-            from novel_runtime.storage.project_storage import ProjectStorage
-            chapter.draft_count += 1
-            current_draft_id = chapter.draft_count
-            save_draft_version(project_path, chapter_number, current_draft_id, full_text)
-            chapter.active_draft_id = current_draft_id
-            chapter.draft_path = str(project_path / "chapters" / f"chapter_{chapter_number:03d}" / "drafts" / f"draft_v{current_draft_id}.md")
-            chapter.status = "drafted"
-            ProjectStorage(Path(settings.storage_base_path)).save_chapter(project, chapter)
-
-            yield f"data: {json_mod.dumps({'done': True, 'full': full_text, 'draft_id': current_draft_id})}\n\n"
+            # finalize: parse annotations + contract check + save (no extra LLM call)
+            from novel_runtime.services.chapter_service import ChapterService
+            from novel_runtime.services.context_service import ContextService
+            ch_svc = ChapterService(project_svc, ContextService(project_svc, provider, loader), provider, loader)
+            result = ch_svc.finalize_streamed_draft(project_id, chapter_number, full_text)
+            yield f"data: {json_mod.dumps({'done': True, 'full': result.get('draft_content', full_text), 'draft_id': result.get('draft_id', 0)})}\n\n"
         except Exception as e:
             yield f"data: {json_mod.dumps({'error': str(e), 'partial': full_text})}\n\n"
 
@@ -214,7 +208,6 @@ async def get_content(
     """Get the current active content for a chapter: active draft, final, or empty."""
     settings = request.app.state.settings
     from novel_runtime.services.project_service import ProjectService
-    from novel_runtime.db.database import Database
     from pathlib import Path
 
     db = request.app.state.db
@@ -240,13 +233,7 @@ async def get_content(
         except FileNotFoundError:
             pass
 
-    # try draft.md as fallback
-    from novel_runtime.storage.chapter_storage import load_chapter_file
-    try:
-        content = load_chapter_file(project_path, chapter_number, "draft")
-        return {"content": content, "source": "draft_file"}
-    except FileNotFoundError:
-        return {"content": "", "source": "none"}
+    return {"content": "", "source": "none"}
 
 
 @router.post("/{chapter_number}/content")
@@ -259,9 +246,8 @@ async def save_content(
     """Save user-edited content as a new draft version."""
     settings = request.app.state.settings
     from novel_runtime.services.project_service import ProjectService
-    from novel_runtime.db.database import Database
     from pathlib import Path
-    from novel_runtime.storage.chapter_storage import save_draft_version
+    from novel_runtime.storage.chapter_storage import save_draft_version, mark_reviews_stale
     from novel_runtime.storage.project_storage import ProjectStorage
 
     db = request.app.state.db
@@ -275,18 +261,41 @@ async def save_content(
         from fastapi import HTTPException
         raise HTTPException(400, "Cannot edit a locked/approved chapter")
 
-    chapter.draft_count += 1
-    current_draft_id = chapter.draft_count
-    save_draft_version(project_path, chapter_number, current_draft_id, content)
-    chapter.active_draft_id = current_draft_id
-    chapter.draft_path = str(project_path / "chapters" / f"chapter_{chapter_number:03d}" / "drafts" / f"draft_v{current_draft_id}.md")
+    # Deduplicate rapid saves: overwrite active draft if last save <60s ago
+    from datetime import datetime, timedelta, timezone
+    now = datetime.now(timezone.utc)
+    last_saved_recently = (
+        chapter.updated_at is not None
+        and isinstance(chapter.updated_at, datetime)
+        and (now - chapter.updated_at.replace(tzinfo=timezone.utc) if chapter.updated_at.tzinfo is None else now - chapter.updated_at) < timedelta(seconds=60)
+        and chapter.active_draft_id > 0
+    )
+    if last_saved_recently:
+        current_draft_id = chapter.active_draft_id
+        save_draft_version(project_path, chapter_number, current_draft_id, content)
+    else:
+        chapter.draft_count += 1
+        current_draft_id = chapter.draft_count
+        save_draft_version(project_path, chapter_number, current_draft_id, content)
+        chapter.active_draft_id = current_draft_id
+        chapter.draft_path = str(project_path / "chapters" / f"chapter_{chapter_number:03d}" / "drafts" / f"draft_v{current_draft_id}.md")
 
-    if chapter.status == "planned":
+    reviews_invalidated = False
+    if chapter.status == "reviewed":
+        chapter.status = "drafted"
+        mark_reviews_stale(project_path, chapter_number)
+        reviews_invalidated = True
+    elif chapter.status == "planned":
         chapter.status = "drafted"
 
     ProjectStorage(Path(settings.storage_base_path)).save_chapter(project, chapter)
 
-    return {"draft_id": current_draft_id, "draft_count": chapter.draft_count, "status": chapter.status}
+    return {
+        "draft_id": current_draft_id,
+        "draft_count": chapter.draft_count,
+        "status": chapter.status,
+        "reviews_invalidated": reviews_invalidated,
+    }
 
 
 @router.get("/{chapter_number}/drafts")
@@ -329,10 +338,8 @@ async def promote_draft(
     draft_id: int,
     request: Request,
 ):
-    from novel_runtime.storage.chapter_storage import load_draft_version
     settings = request.app.state.settings
     from novel_runtime.services.project_service import ProjectService
-    from novel_runtime.db.database import Database
     from pathlib import Path
 
     db = request.app.state.db
@@ -356,9 +363,7 @@ async def multi_reader_review(
     from novel_runtime.agents.reader_personas import BUILTIN_PERSONAS, PERSONA_MAP
     from novel_runtime.llm.provider import create_provider
     from novel_runtime.services.project_service import ProjectService
-    from novel_runtime.db.database import Database
     from pathlib import Path
-    import json as _json
 
     settings = request.app.state.settings
     db = request.app.state.db
