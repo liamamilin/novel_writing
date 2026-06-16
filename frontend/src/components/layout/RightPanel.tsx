@@ -57,7 +57,7 @@ export function RightPanel() {
     {
       label: '\u7F16\u8BD1\u4E0A\u4E0B\u6587',
       action: 'compile_context',
-      apiCall: () => api.post(`/projects/${pid}/context/compile`, { chapter_number: ch }),
+      apiCall: () => api.post(`/projects/${pid}/context/compile?chapter_number=${ch}`, {}),
     },
     {
       label: '\u751F\u6210\u89C4\u5212',
@@ -102,7 +102,7 @@ export function RightPanel() {
       <div>
         <h3 className="font-bold text-sm text-gray-500 uppercase mb-1">{"\uD83D\uDCC1"} \u9879\u76EE\u7BA1\u7406</h3>
         <button
-          onClick={() => runAction('health', () => api.get(`/projects/${pid}/health`))}
+          onClick={() => runAction('health', () => api.get(`/health`))}
           disabled={!pid || !!loading}
           className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 rounded border-b last:border-b-0 disabled:opacity-50"
         >

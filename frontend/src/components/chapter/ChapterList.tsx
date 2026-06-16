@@ -1,7 +1,8 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useProjectStore } from '../../stores/projectStore';
 import { useChapterStore } from '../../stores/chapterStore';
 import { useUIStore } from '../../stores/uiStore';
+import { chaptersApi } from '../../api/chapters';
 
 const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
   planned: { bg: 'bg-gray-200', text: 'text-gray-600', label: '\u89C4\u5212' },
@@ -18,6 +19,8 @@ export function ChapterList() {
   const loadChapters = useChapterStore((s) => s.loadChapters);
   const setCurrentChapter = useChapterStore((s) => s.setCurrentChapter);
   const selectAsset = useUIStore((s) => s.selectAsset);
+  const notify = useUIStore((s) => s.notify);
+  const [creating, setCreating] = useState(false);
 
   useEffect(() => {
     if (currentProject) {
@@ -34,9 +37,29 @@ export function ChapterList() {
   }
 
   if (chapters.length === 0) {
+    const handleCreateFirst = async () => {
+      if (!currentProject) return;
+      setCreating(true);
+      try {
+        await chaptersApi.plan(currentProject.project_id, 1, '\u5F00\u573A\u7AE0\u8282');
+        await loadChapters(currentProject.project_id);
+        notify('\u7B2C 1 \u7AE0\u5DF2\u521B\u5EFA', 'success');
+      } catch (e) {
+        notify((e as Error).message, 'error');
+      } finally {
+        setCreating(false);
+      }
+    };
     return (
-      <div className="text-sm text-gray-400 px-2 py-4">
-        \u6682\u65E0\u7AE0\u8282\uFF0C\u8BF7\u5148\u751F\u6210\u89C4\u5212
+      <div className="text-sm text-gray-400 px-2 py-4 space-y-2">
+        <p>\u6682\u65E0\u7AE0\u8282</p>
+        <button
+          onClick={handleCreateFirst}
+          disabled={creating}
+          className="bg-blue-500 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-600 disabled:opacity-50"
+        >
+          {creating ? '\u521B\u5EFA\u4E2D...' : '+ \u521B\u5EFA\u7B2C 1 \u7AE0'}
+        </button>
       </div>
     );
   }

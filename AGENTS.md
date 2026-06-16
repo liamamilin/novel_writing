@@ -50,23 +50,24 @@ dev_plan/             # 18 detailed phase-plan files
 docs/                 # Deployment guide
 ```
 
-## 57 API Endpoints
+## 57 API Endpoints (53 REST + 4 docs)
 
-| Module | Routes | Key endpoints |
-|--------|--------|--------------|
-| Projects | 4 | CRUD |
-| Styles | 4 | Sample upload, analyze, CRUD |
-| Bible | 7 | Generate, direction, characters, update |
-| Context | 2 | Compile, narrative diagnosis |
-| Chapters | 18 | Plan/Draft/Polish/Review/Approve, SSE stream, draft versions, multi-reader |
-| State | 5 | Update, rollback, snapshots |
-| Export | 3 | Export task, download |
-| Subplots | 4 | CRUD |
-| Hooks | 3 | CRUD |
-| Strategy | 2 | CRUD |
-| Events | 1 | Timeline |
-| Shared | 3 | Read-only share access |
-| System | 2 | Health (with LLM latency probe), Metrics |
+| Module | Count | Endpoints |
+|--------|-------|-----------|
+| Projects | 4 | POST/GET list, GET/PUT by id |
+| Styles | 5 | GET list, POST analyze, POST sample, GET by id, POST test-paragraph |
+| Bible | 7 | GET bible, POST direction/characters/generate/update, GET update-proposal/version |
+| Context | 1 | POST compile |
+| Chapters | 12 | GET list, POST plan/draft/stream/polish/review/multi-reader/approve, GET drafts/draft detail, POST promote, POST state/update |
+| State | 2 | POST rollback, GET snapshots |
+| Export | 2 | POST export, GET download |
+| Subplots | 4 | GET/POST list, GET suggestions, PUT by id |
+| Hooks | 6 | GET/POST list, GET by chapter, PUT by id, POST resolve/trigger |
+| Strategy | 3 | GET/PUT, POST reset |
+| Events | 1 | GET timeline |
+| Share | 1 | POST share link |
+| Shared | 3 | GET token/chapters/chapter detail (no auth) |
+| System | 2 | GET health (LLM latency probe), GET metrics |
 
 ## Key conventions
 

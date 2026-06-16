@@ -78,36 +78,38 @@ cd frontend && npm run build              # 前端构建 (0 error)
 | Cross-Chapter Auditor | 审查层 | 跨章诊断 |
 | Reader Simulator | 审查层 | 读者视角模拟 |
 
-### 57 API 端点
+### 57 API 端点（53 REST + 4 文档）
 
-| 模块 | 端点 | 功能 |
-|------|------|------|
-| Projects | `+4` | CRUD + 心跳 |
-| Styles | `+4` | 上传样本 / 分析 / CRUD |
-| Bible | `+7` | 生成 / 更新 / 方向选择 |
-| Context | `+2` | 编译上下文 / 叙事诊断 |
-| Chapters | `+18` | 规划 / 草稿 / 审查 / 定稿 / SSE 流式 / 版本树 / 多读者 |
-| State | `+5` | 状态更新 / 回滚 / snapshot |
-| Export | `+3` | 导出任务 / 下载 |
-| Subplots | `+4` | 子线 CRUD |
-| Hooks | `+3` | 伏笔管理 |
-| Strategy | `+2` | 写作策略 |
-| Events | `+1` | 活动时间线 |
-| Shared | `+3` | 分享链接只读访问 |
+| 模块 | 端点数 | 核心功能 |
+|------|--------|---------|
+| Projects | 4 | CRUD |
+| Styles | 5 | 分析 / 样本 / CRUD / 对抗测试 |
+| Bible | 7 | 方向选择 / 角色 / 生成 / 更新 / 版本 |
+| Context | 1 | 编译上下文 |
+| Chapters | 12 | 规划 / 草稿 / SSE 流式 / 润色 / 审查 / 多读者 / 定稿 / 版本树 |
+| State | 2 | 回滚 / snapshot |
+| Export | 2 | 导出任务 / 下载 |
+| Subplots | 4 | 子线 CRUD + 建议 |
+| Hooks | 6 | 伏笔 CRUD + 触发 / 回收 |
+| Strategy | 3 | 读写 + 重置 |
+| Events | 1 | 时间线 |
+| Share | 1 | 生成分享链接 |
+| Shared | 3 | 只读访问（豁免认证） |
+| System | 2 | 健康检查（含 LLM 延迟探测）/ 监控指标 |
 
 ## 技术栈
 
 - **后端**：Python 3.10 / FastAPI / Pydantic v2 / SQLite / YAML + Markdown
 - **前端**：React 19 / TypeScript / Vite / Tailwind / Zustand / React Query
 - **LLM**：OpenAI Compatible Provider（支持任意兼容 API）
-- **监控**：Prometheus (5 自定义指标) + Grafana dashboard
+- **监控**：Prometheus (5 自定义指标) + Grafana dashboard + 告警规则
 - **部署**：Docker Compose (Nginx + uvicorn)
 
 ## 文档
 
-- [生产部署指南](docs/DEPLOY.md)
-- [开发计划](DEVELOPMENT_PLAN.md)
-- [Agent 配置](AGENTS.md)
+- [生产部署指南](docs/DEPLOY.md) — Docker / systemd / 监控 / 备份 / 安全
+- [开发计划](DEVELOPMENT_PLAN.md) — 完整架构规范
+- [Agent 配置](AGENTS.md) — CLI / 测试 / 坑点
 
 ## 许可证
 

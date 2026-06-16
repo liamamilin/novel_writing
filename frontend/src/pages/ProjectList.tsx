@@ -1,54 +1,38 @@
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import { useProjectStore } from '../stores/projectStore';
 
 export function ProjectList() {
-  const { projects, loadProjects, createProject } = useProjectStore();
-  const [name, setName] = useState('');
-  const [genre, setGenre] = useState('');
+  const navigate = useNavigate();
+  const { projects, loadProjects } = useProjectStore();
 
   useEffect(() => { loadProjects(); }, []);
-
-  const handleCreate = async () => {
-    if (!name || !genre) return;
-    await createProject({ project_name: name, genre });
-    setName('');
-    setGenre('');
-    await loadProjects();
-  };
 
   return (
     <div className="max-w-2xl mx-auto p-8">
       <h1 className="text-2xl font-bold mb-6">Novel Writing Runtime</h1>
-      <div className="bg-white rounded-lg shadow p-4 mb-6">
-        <h2 className="font-semibold mb-3">创建项目</h2>
-        <input
-          className="w-full border rounded p-2 mb-2"
-          placeholder="项目名称"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          className="w-full border rounded p-2 mb-2"
-          placeholder="小说类型（如: 都市修仙）"
-          value={genre}
-          onChange={(e) => setGenre(e.target.value)}
-        />
-        <button
-          onClick={handleCreate}
-          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
-        >
-          创建项目
-        </button>
-      </div>
+      <Link
+        to="/project/new"
+        className="inline-block bg-blue-600 text-white px-5 py-2 rounded hover:bg-blue-700 mb-6"
+      >
+        + 新建项目
+      </Link>
       <div className="space-y-2">
+        {projects.length === 0 && (
+          <p className="text-gray-400 text-sm">暂无项目，点击上方按钮创建</p>
+        )}
         {projects.map((p) => (
-          <div key={p.project_id} className="bg-white rounded shadow p-3 flex justify-between">
+          <button
+            key={p.project_id}
+            onClick={() => navigate(`/project/${p.project_id}`)}
+            className="w-full bg-white rounded shadow p-3 flex justify-between hover:bg-gray-50 text-left"
+          >
             <div>
               <span className="font-medium">{p.project_name}</span>
               <span className="ml-2 text-sm text-gray-500">{p.genre}</span>
             </div>
             <span className="text-sm text-gray-400">{p.status}</span>
-          </div>
+          </button>
         ))}
       </div>
     </div>

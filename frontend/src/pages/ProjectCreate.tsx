@@ -4,6 +4,7 @@ import { useProjectStore } from '../stores/projectStore';
 import { useUIStore } from '../stores/uiStore';
 import { stylesApi } from '../api/styles';
 import { bibleApi } from '../api/bible';
+import { chaptersApi } from '../api/chapters';
 
 type Step = 1 | 2 | 3;
 
@@ -97,7 +98,8 @@ export function ProjectCreate() {
     setLoading(true);
     try {
       await bibleApi.generate(projectId, selectedDirection || '');
-      notify('Bible \u751F\u6210\u5B8C\u6210\uFF01', 'success');
+      await chaptersApi.plan(projectId, 1, '开场章节');
+      notify('Bible \u751F\u6210\u5B8C\u6210\uFF0C\u5DF2\u521B\u5EFA\u7B2C 1 \u7AE0', 'success');
       navigate(`/project/${projectId}`);
     } catch (e) {
       notify((e as Error).message, 'error');
