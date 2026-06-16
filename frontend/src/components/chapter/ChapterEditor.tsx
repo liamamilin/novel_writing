@@ -120,7 +120,9 @@ export function ChapterEditor() {
     return () => window.removeEventListener('keydown', handler);
   }, [handleSave, isReadOnly, isStreaming]);
 
+  const [selectedDraftId, setSelectedDraftId] = useState<number>(0);
   const handleDraftSelect = useCallback((_draftId: number, _content: string) => {
+    setSelectedDraftId(_draftId);
     if (!showDiff) {
       setShowDiff(true);
       setDiffOld(content);
@@ -236,12 +238,20 @@ export function ChapterEditor() {
         <div className="flex-1 overflow-auto">
           <div className="flex items-center justify-between mb-2">
             <h4 className="text-sm font-medium text-gray-600">版本对比</h4>
-            <button
-              onClick={() => setShowDiff(false)}
-              className="text-xs text-blue-600 hover:text-blue-800"
-            >
-              返回编辑
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={() => { setContent(diffNew); setLoadedContent(diffNew); setShowDiff(false); }}
+                className="text-xs text-green-600 hover:text-green-800"
+              >
+                加载到编辑器 (v{selectedDraftId})
+              </button>
+              <button
+                onClick={() => setShowDiff(false)}
+                className="text-xs text-blue-600 hover:text-blue-800"
+              >
+                返回编辑
+              </button>
+            </div>
           </div>
           <DraftDiff
             leftContent={diffOld}

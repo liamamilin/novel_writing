@@ -7,12 +7,12 @@ import { useStreamStore } from '../../stores/streamStore';
 import { chaptersApi } from '../../api/chapters';
 import { bibleApi } from '../../api/bible';
 
-const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
-  planned: { bg: 'bg-gray-200', text: 'text-gray-600', label: '\u89C4\u5212' },
-  drafted: { bg: 'bg-yellow-200', text: 'text-yellow-700', label: '\u8349\u7A3F' },
-  reviewed: { bg: 'bg-blue-200', text: 'text-blue-700', label: '\u5DF2\u5BA1\u67E5' },
-  approved: { bg: 'bg-green-200', text: 'text-green-700', label: '\u5DF2\u786E\u8BA4' },
-  locked: { bg: 'bg-gray-400', text: 'text-gray-800', label: '\u5DF2\u9501\u5B9A' },
+const statusConfig: Record<string, { bg: string; text: string; label: string; icon: string }> = {
+  planned: { bg: 'bg-gray-200', text: 'text-gray-600', label: '\u89C4\u5212', icon: '\uD83D\uDCDD' },
+  drafted: { bg: 'bg-yellow-200', text: 'text-yellow-700', label: '\u8349\u7A3F', icon: '\u270F\uFE0F' },
+  reviewed: { bg: 'bg-blue-200', text: 'text-blue-700', label: '\u5DF2\u5BA1\u67E5', icon: '\uD83D\uDD0D' },
+  approved: { bg: 'bg-green-200', text: 'text-green-700', label: '\u5DF2\u786E\u8BA4', icon: '\u2705' },
+  locked: { bg: 'bg-gray-400', text: 'text-gray-800', label: '\u5DF2\u9501\u5B9A', icon: '\uD83D\uDD12' },
 };
 
 export function ChapterList() {
@@ -120,7 +120,7 @@ export function ChapterList() {
               {ch.title ? ` — ${ch.title}` : ''}
             </span>
             <span className={`text-xs px-1.5 py-0.5 rounded ${cfg.bg} ${cfg.text}`}>
-              {cfg.label}
+              {cfg.icon} {cfg.label}
             </span>
           </button>
         );

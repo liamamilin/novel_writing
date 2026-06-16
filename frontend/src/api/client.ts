@@ -20,10 +20,14 @@ function buildHeaders(extra?: Record<string, string>): Record<string, string> {
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE_URL}${path}`, {
-    headers: buildHeaders(options?.headers as Record<string, string> | undefined),
-    ...options,
-  });
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), options?.method === 'POST' ? 120_000 : 60_000);
+  try {
+    const res = await fetch(`${BASE_URL}${path}`, {
+      headers: buildHeaders(options?.headers as Record<string, string> | undefined),
+      signal: controller.signal,
+      ...options,
+    });
   if (res.status === 401) {
     localStorage.removeItem('nwr_token');
     window.dispatchEvent(new CustomEvent('auth:required'));
@@ -33,6 +37,9 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
     throw new Error(err.detail || `HTTP ${res.status}`);
   }
   return res.json();
+  } finally {
+    clearTimeout(timeout);
+  }
 }
 
 export const api = {
