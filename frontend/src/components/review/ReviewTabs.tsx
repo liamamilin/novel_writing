@@ -7,13 +7,13 @@ const TABS = [
   { key: 'reader_sim', label: '\u8BFB\u8005\u6A21\u62DF' },
 ] as const;
 
-interface FixInstruction {
+export interface FixInstruction {
   severity: string;
   description: string;
   location?: string;
 }
 
-interface ReviewData {
+export interface ReviewData {
   summary: string;
   issues: string[];
   fix_instructions: FixInstruction[];

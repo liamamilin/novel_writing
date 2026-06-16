@@ -96,6 +96,31 @@ def mark_reviews_stale(project_path: Path, chapter_number: int) -> None:
                 f.rename(stale_name)
 
 
+def load_reviews(project_path: Path, chapter_number: int) -> dict[str, str]:
+    reviews = {}
+    for key in ["review_continuity", "review_quality", "review_cross_chapter", "review_reader_sim"]:
+        try:
+            reviews[key.replace("review_", "")] = load_chapter_file(project_path, chapter_number, key)
+        except FileNotFoundError:
+            reviews[key.replace("review_", "")] = ""
+    return reviews
+
+
+def load_fix_instructions(project_path: Path, chapter_number: int) -> list[dict]:
+    ext, filename = _FILE_TYPE_MAP.get("fix_instructions", ("yaml", "fix_instructions.yaml"))
+    file_path = _chapter_dir(project_path, chapter_number) / filename
+    if not file_path.exists():
+        return []
+    try:
+        data = read_yaml(file_path)
+        if isinstance(data, dict):
+            instructions = data.get("instructions", data.get("fix_instructions", []))
+            return instructions if isinstance(instructions, list) else []
+        return []
+    except Exception:
+        return []
+
+
 def freeze_chapter(project_path: Path, chapter_number: int) -> None:
     chapter_dir = _chapter_dir(project_path, chapter_number)
     if not chapter_dir.exists():

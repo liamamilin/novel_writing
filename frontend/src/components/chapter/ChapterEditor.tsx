@@ -24,7 +24,6 @@ export function ChapterEditor() {
   const currentChapter = useChapterStore((s) => s.currentChapter);
   const loadChapters = useChapterStore((s) => s.loadChapters);
   const notify = useUIStore((s) => s.notify);
-  const [activeTab, setActiveTab] = useState<'plan' | 'draft' | 'final'>('draft');
   const [content, setContent] = useState('');
   const [loadedContent, setLoadedContent] = useState('');
   const [saving, setSaving] = useState(false);
@@ -36,14 +35,6 @@ export function ChapterEditor() {
   const [diffNew, setDiffNew] = useState('');
   const [diffOldTitle, setDiffOldTitle] = useState('');
   const [diffNewTitle, setDiffNewTitle] = useState('');
-
-  useEffect(() => {
-    if (currentChapter) {
-      if (currentChapter.status === 'planned') setActiveTab('plan');
-      else if (currentChapter.status === 'locked' || currentChapter.status === 'approved') setActiveTab('final');
-      else setActiveTab('draft');
-    }
-  }, [currentChapter]);
 
   // B4: auto-load content when chapter changes
   useEffect(() => {
@@ -211,19 +202,10 @@ export function ChapterEditor() {
       )}
 
       <div className="flex items-center justify-between mb-3">
-        <div className="flex gap-2">
-          {(['plan', 'draft', 'final'] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              disabled={isStreaming}
-              className={`px-3 py-1 text-sm rounded border ${
-                activeTab === tab ? 'bg-blue-500 text-white border-blue-500' : 'bg-white text-gray-600 border-gray-300 hover:bg-gray-50'
-              } ${isStreaming ? 'opacity-50 cursor-not-allowed' : ''}`}
-            >
-              {tab === 'plan' ? '规划' : tab === 'draft' ? '草稿' : '终稿'}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400 bg-gray-100 rounded px-2 py-0.5">
+            {currentChapter.status === 'approved' || currentChapter.status === 'locked' ? '终稿' : '草稿'}
+          </span>
           {!isReadOnly && !isStreaming && (
             <button
               onClick={handleSave}

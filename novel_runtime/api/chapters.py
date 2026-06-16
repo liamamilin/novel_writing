@@ -12,6 +12,7 @@ from novel_runtime.services.chapter_service import ChapterService
 from novel_runtime.services.context_service import ContextService
 from novel_runtime.services.project_service import ProjectService
 from novel_runtime.services.review_service import ReviewService
+from novel_runtime.storage import chapter_storage
 
 
 router = APIRouter(prefix="/api/projects/{project_id}/chapters", tags=["chapters"])
@@ -197,6 +198,23 @@ async def review_chapter(
         chapter_number,
         body.get("review_types", ["continuity", "quality"]),
     )
+
+
+@router.get("/{chapter_number}/reviews")
+async def get_reviews(
+    project_id: str,
+    chapter_number: int,
+    request: Request,
+):
+    settings = request.app.state.settings
+    from novel_runtime.services.project_service import ProjectService
+    from pathlib import Path
+    db = request.app.state.db
+    project_svc = ProjectService(db, Path(settings.storage_base_path))
+    project_path = project_svc.get_project_path(project_id)
+    reviews = chapter_storage.load_reviews(project_path, chapter_number)
+    fix_instructions = chapter_storage.load_fix_instructions(project_path, chapter_number)
+    return {"reviews": reviews, "fix_instructions": fix_instructions}
 
 
 @router.get("/{chapter_number}/content")
