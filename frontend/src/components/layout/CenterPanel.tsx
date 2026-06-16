@@ -8,7 +8,7 @@ import { api } from '../../api/client';
 
 const ChapterEditor = lazy(() => import('../chapter/ChapterEditor').then(m => ({ default: m.ChapterEditor })));
 const ReviewTabs = lazy(() => import('../review/ReviewTabs').then(m => ({ default: m.ReviewTabs })));
-const BibleVersion = lazy(() => import('../asset/BibleVersion').then(m => ({ default: m.BibleVersion })));
+const BibleViewer = lazy(() => import('../asset/BibleViewer').then(m => ({ default: m.BibleViewer })));
 const SubplotTable = lazy(() => import('../asset/SubplotTable').then(m => ({ default: m.SubplotTable })));
 const HookTable = lazy(() => import('../asset/HookTable').then(m => ({ default: m.HookTable })));
 const StrategyForm = lazy(() => import('../asset/StrategyForm').then(m => ({ default: m.StrategyForm })));
@@ -16,7 +16,7 @@ const SnapshotList = lazy(() => import('../asset/SnapshotList').then(m => ({ def
 const MultiReaderChart = lazy(() => import('../chapter/MultiReaderChart').then(m => ({ default: m.MultiReaderChart })));
 
 const assetComponents: Record<string, React.ComponentType> = {
-  bible: BibleVersion,
+  bible: BibleViewer,
   state: SnapshotList,
   hooks: HookTable,
   subplots: SubplotTable,
