@@ -50,41 +50,6 @@ dev_plan/             # 18 detailed phase-plan files
 docs/                 # Deployment guide
 ```
 
-## 57 API Endpoints (53 REST + 4 docs)
-
-| Module | Count | Endpoints |
-|--------|-------|-----------|
-| Projects | 4 | POST/GET list, GET/PUT by id |
-| Styles | 5 | GET list, POST analyze, POST sample, GET by id, POST test-paragraph |
-| Bible | 7 | GET bible, POST direction/characters/generate/update, GET update-proposal/version |
-| Context | 1 | POST compile |
-| Chapters | 12 | GET list, POST plan/draft/stream/polish/review/multi-reader/approve, GET drafts/draft detail, POST promote, POST state/update |
-| State | 2 | POST rollback, GET snapshots |
-| Export | 2 | POST export, GET download |
-| Subplots | 4 | GET/POST list, GET suggestions, PUT by id |
-| Hooks | 6 | GET/POST list, GET by chapter, PUT by id, POST resolve/trigger |
-| Strategy | 3 | GET/PUT, POST reset |
-| Events | 1 | GET timeline |
-| Share | 1 | POST share link |
-| Shared | 3 | GET token/chapters/chapter detail (no auth) |
-| System | 2 | GET health (LLM latency probe), GET metrics |
-
-## Key conventions
-
-- **57 API routes** live in `novel_runtime/api/`, project-id is always a path param
-- **Agents** extend `BaseAgent`; override `get_prompt_template()`, `process_output()`, optionally `get_validator()`
-- **Data models** are Pydantic v2; state files on disk are YAML + Markdown
-- **Config**: env vars prefix `NWR_`; `LLM_API_KEY` (no prefix) loaded via `load_dotenv()` → `os.environ`
-- **Tests**: mock LLM via `MagicMock`, set both `.generate.return_value` and `.generate_with_usage.return_value`
-- **CLI**: `novel style analyze`, `novel bible generate`, `novel context compile`, `novel chapter plan|draft|polish|review|approve`, `novel state update|rollback`, `novel init`, `novel health`, `novel next-suggest`, `novel cache stats|clear`
-- **Chapter status flow**: `planned → drafted → reviewed → approved → locked`
-- **Prompt templates** in `prompts/` use `{{variable}}` syntax, loaded by `PromptLoader`
-- **Logging**: request_id via ContextVar; JSON with `NWR_LOG_FORMAT=json`, text with `NWR_LOG_FORMAT=text`
-- **Auth**: Bearer token via `NWR_AUTH_TOKEN` (empty = disabled). `/health`, `/metrics`, `/docs`, `/api/shared/` exempt
-- **Rate limit**: default 60/min per IP via slowapi
-- **LLM Cache**: SQLite-backed, enabled with `NWR_LLM_CACHE_ENABLED=true`. Key = sha256(prompt+system+context+model+temperature)
-- **Monitoring**: 5 Prometheus metrics (`nwr_llm_calls_total`, `nwr_llm_tokens_total`, `nwr_llm_latency_seconds`, `nwr_task_duration_seconds`, `nwr_chapter_status_count`) + Grafana dashboard + alert rules
-
 ## Gotchas
 
 - Never pass a dict to `ProjectService.update_project()`; wrap in `ProjectUpdate(...)` first
@@ -99,19 +64,29 @@ docs/                 # Deployment guide
 - `StyleAsset()` is imported at module level in `chapters.py` — do NOT inline-import it inside the `event_stream()` closure to avoid NameError
 - `api/__init__.py` must export all routers — missing entries cause confusing import errors
 - `.env` must use `load_dotenv()` (top of `config.py`) instead of pydantic's `env_file=` to avoid `extra_forbidden` error with `LLM_API_KEY`
+- `DELETE /projects/{id}` removes both DB row + filesystem tree (`shutil.rmtree`) — irreversible
+- `DELETE /subplots/{id}` cleans both individual YAML + registry entry
+- `POST /styles/analyze-sync` is the synchronous alternative to `POST /styles/analyze` (async + task_id) — use analyze-sync in ProjectCreate wizard, analyze for large async operations
+- AuthMiddleware exempt list now includes `/shared/` (frontend reader) — update when adding new public paths
+- `generate_bible` now accepts `{direction_id, characters}` instead of `{direction: dict}` — frontend sends string direction_id; backend loads `selected_direction.yaml`
+- `generate_characters` accepts `{direction_id}` — backend loads direction file automatically
+- `GET /chapters/{ch}/reviews` returns raw review markdown content + fix_instructions; ReviewTabs on frontend does basic section parsing
+- Since Batch A: ProjectList has 🗑 delete; ExportModal has chapter_range + includeTitle; TokenModal pops on 401
+- Since Batch H: API client has AbortSignal timeout (60s GET / 120s POST); toast auto-clears; HealthBadge no longer navigates away
 
-## 57 API Endpoints (53 REST + 4 docs) — v2
+## 63 API Endpoints (59 REST + 4 docs) — v3
 
 | Module | Count | Endpoints |
 |--------|-------|-----------|
-| Projects | 4 | POST/GET list, GET/PUT by id |
-| Styles | 5 | GET list, POST analyze, POST sample, GET by id, POST test-paragraph |
+| Projects | 5 | POST/GET list, GET/PUT/DELETE by id |
+| Styles | 6 | GET list, POST analyze/analyze-sync, POST sample, GET by id, POST test-paragraph |
+| Tasks | 1 | GET task by id |
 | Bible | 7 | GET bible, POST direction/characters/generate/update, GET update-proposal/version |
 | Context | 1 | POST compile |
-| Chapters | **14** | GET list, POST plan/draft/stream/polish/review/multi-reader/approve, GET drafts/draft detail/content, POST content/promote, POST state/update |
+| Chapters | **15** | GET list, POST plan/draft/stream/polish/review/multi-reader/approve, GET drafts/draft detail/content/reviews, POST content/promote, POST state/update |
 | State | 2 | POST rollback, GET snapshots |
 | Export | 2 | POST export, GET download |
-| Subplots | 4 | GET/POST list, GET suggestions, PUT by id |
+| Subplots | 5 | GET/POST list, GET suggestions, PUT/DELETE by id |
 | Hooks | 6 | GET/POST list, GET by chapter, PUT by id, POST resolve/trigger |
 | Strategy | 3 | GET/PUT, POST reset |
 | Events | 1 | GET timeline |
