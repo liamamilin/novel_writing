@@ -109,9 +109,9 @@ export function ProjectCreate() {
   };
 
   const steps = [
-    { n: 1, label: '\u521B\u5EFA\u9879\u76EE' },
-    { n: 2, label: '\u6587\u98CE\u5206\u6790' },
-    { n: 3, label: 'Bible \u751F\u6210' },
+    { n: 1, label: '\u521B\u5EFA\u9879\u76EE', hint: '\u586B\u5199\u9879\u76EE\u540D\u79F0\u3001\u7C7B\u578B\u548C\u521B\u610F' },
+    { n: 2, label: '\u6587\u98CE\u5206\u6790', hint: '\u4E0A\u4F20\u6837\u672C\u6587\u672C\uFF0CAI \u81EA\u52A8\u63D0\u53D6\u5199\u4F5C\u98CE\u683C\u7279\u5F81' },
+    { n: 3, label: 'Bible \u751F\u6210', hint: '\u751F\u6210\u65B9\u5411\u53D8\u4F53 \u2192 \u89D2\u8272\u6982\u5FF5 \u2192 \u5B8C\u6574 Bible + \u81EA\u52A8\u521B\u5EFA\u7B2C\u4E00\u7AE0' },
   ];
 
   return (
@@ -120,7 +120,7 @@ export function ProjectCreate() {
 
       <div className="flex items-center gap-2 mb-8">
         {steps.map((s, i) => (
-          <div key={s.n} className="flex items-center">
+            <div key={s.n} className="flex items-center" title={s.hint}>
             <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
               step >= s.n ? 'bg-blue-500 text-white' : 'bg-gray-200 text-gray-500'
             }`}>
@@ -170,10 +170,28 @@ export function ProjectCreate() {
       {step === 2 && (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">\u7C98\u8D34\u6587\u98CE\u6837\u672C\u6587\u672C</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              粘贴文风样本文本
+              <span className="ml-1 text-xs text-gray-400" title="上传一段你喜欢的写作风格的样本，AI 会分析其文风特征">?</span>
+            </label>
             <textarea value={styleSample} onChange={(e) => setStyleSample(e.target.value)}
               className="w-full border rounded px-3 py-2 text-sm font-mono" rows={8}
-              placeholder="\u7C98\u8D34\u4F60\u5E0C\u671B\u6A21\u4EFF\u7684\u5C0F\u8BF4\u7247\u6BB5..." />
+              placeholder="粘贴你希望模仿的小说片段..." />
+            <details className="mt-2">
+              <summary className="text-xs text-blue-500 cursor-pointer hover:text-blue-700">想不到样本？点这里使用示例文本</summary>
+              <div className="mt-2 text-xs text-gray-600 bg-gray-50 p-3 rounded border">
+                <p>林云推开大门，刺眼的灯光倾泻而下。全场安静了三秒。</p>
+                <p className="mt-1">他扫视了一圈。东边是赵家的包间，西边是李家的，中间主位上坐着一个戴着玉扳指的老人——云海市拍卖行的掌舵人。</p>
+                <p className="mt-1">"来了？"老人抬眼。</p>
+                <p className="mt-1">"来了。"林云淡淡应道，在最后一排坐下。</p>
+                <button
+                  onClick={() => setStyleSample('林云推开大门，刺眼的灯光倾泻而下。全场安静了三秒。\n\n他扫视了一圈。东边是赵家的包间，西边是李家的，中间主位上坐着一个戴着玉扳指的老人——云海市拍卖行的掌舵人。\n\n"来了？"老人抬眼。\n\n"来了。"林云淡淡应道，在最后一排坐下。')}
+                  className="mt-2 text-blue-500 hover:text-blue-700"
+                >
+                  使用此样本
+                </button>
+              </div>
+            </details>
           </div>
           <button onClick={handleAnalyzeStyle} disabled={loading}
             className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50">

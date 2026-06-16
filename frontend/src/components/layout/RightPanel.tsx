@@ -153,7 +153,9 @@ export function RightPanel() {
             <button
               onClick={() => {
                 if (isStreaming) {
-                  cancelStream();
+                  if (window.confirm('确定要停止流式生成吗？已生成的内容不会丢失。')) {
+                    cancelStream();
+                  }
                 } else {
                   streamDraft(pid!, ch!);
                 }

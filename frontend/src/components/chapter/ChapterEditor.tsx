@@ -1,6 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
-import MDEditor from '@uiw/react-md-editor';
+import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
 import { useChapterStore } from '../../stores/chapterStore';
+
+const MDEditor = lazy(() => import('@uiw/react-md-editor'));
 import { useProjectStore } from '../../stores/projectStore';
 import { useStreamStore } from '../../stores/streamStore';
 import { DraftSelector } from './DraftSelector';
@@ -157,13 +158,15 @@ export function ChapterEditor() {
         </div>
       ) : (
         <div className="flex-1" data-color-mode="light">
-          <MDEditor
-            value={isStreaming ? streamedContent : content}
-            onChange={(v) => !isReadOnly && !isStreaming && setContent(v || '')}
-            preview={isStreaming || isReadOnly ? 'preview' : 'edit'}
-            hideToolbar={isStreaming || isReadOnly}
-            height="100%"
-          />
+          <Suspense fallback={<div className="flex items-center justify-center h-full text-gray-400 text-sm">加载编辑器...</div>}>
+            <MDEditor
+              value={isStreaming ? streamedContent : content}
+              onChange={(v) => !isReadOnly && !isStreaming && setContent(v || '')}
+              preview={isStreaming || isReadOnly ? 'preview' : 'edit'}
+              hideToolbar={isStreaming || isReadOnly}
+              height="100%"
+            />
+          </Suspense>
         </div>
       )}
     </div>

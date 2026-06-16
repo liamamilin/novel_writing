@@ -5,6 +5,7 @@ import { LeftPanel } from './components/layout/LeftPanel';
 import { CenterPanel } from './components/layout/CenterPanel';
 import { RightPanel } from './components/layout/RightPanel';
 import { ActivityDrawer } from './components/layout/ActivityDrawer';
+import { HealthBadge } from './components/layout/HealthBadge';
 import { ProjectList } from './pages/ProjectList';
 import { ProjectCreate } from './pages/ProjectCreate';
 import { useUIStore } from './stores/uiStore';
@@ -32,6 +33,7 @@ function MainLayout() {
         </div>
       )}
 
+      <HealthBadge />
       {currentProject && (
         <>
           <button
