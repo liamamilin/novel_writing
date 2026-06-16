@@ -186,6 +186,7 @@ from novel_runtime.api.state import router as state_router
 from novel_runtime.api.export import router as export_router
 from novel_runtime.api.events import router as events_router
 from novel_runtime.api.shared import router as shared_router
+from novel_runtime.api.tasks import router as tasks_router
 
 app.include_router(projects_router)
 app.include_router(styles_router)
@@ -199,6 +200,7 @@ app.include_router(state_router)
 app.include_router(export_router)
 app.include_router(events_router)
 app.include_router(shared_router)
+app.include_router(tasks_router)
 
 
 @app.exception_handler(NovelRuntimeError)

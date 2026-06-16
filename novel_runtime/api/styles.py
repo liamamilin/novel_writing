@@ -34,6 +34,21 @@ async def upload_sample(
     return {"sample_id": sample_id, "status": "uploaded"}
 
 
+@router.post("/analyze-sync")
+async def analyze_style_sync(
+    project_id: str,
+    body: dict,
+    svc: StyleService = Depends(get_style_service),
+):
+    style = svc.analyze_style_sync(
+        project_id,
+        body.get("sample_ids", []),
+        body.get("style_name", ""),
+        body.get("run_adversarial", True),
+    )
+    return {"style_id": style.style_id, "status": "completed"}
+
+
 @router.post("/analyze")
 async def analyze_style(
     project_id: str,

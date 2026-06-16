@@ -7,8 +7,12 @@ export const stylesApi = {
       sample_name: 'upload', text,
     }),
   analyze: (pid: string, sampleIds: string[], styleName: string) =>
-    api.post<{ task_id: string; status: string } | StyleAsset>(
+    api.post<{ task_id: string; status: string }>(
       `/projects/${pid}/styles/analyze`, { sample_ids: sampleIds, style_name: styleName },
+    ),
+  analyzeSync: (pid: string, sampleIds: string[], styleName: string) =>
+    api.post<{ style_id: string; status: string }>(
+      `/projects/${pid}/styles/analyze-sync`, { sample_ids: sampleIds, style_name: styleName },
     ),
   get: (pid: string, sid: string) =>
     api.get<StyleAsset>(`/projects/${pid}/styles/${sid}`),

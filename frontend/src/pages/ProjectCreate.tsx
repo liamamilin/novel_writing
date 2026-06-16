@@ -53,8 +53,8 @@ export function ProjectCreate() {
     setLoading(true);
     try {
       const uploadResult = await stylesApi.uploadSample(projectId, styleSample);
-      const result = await stylesApi.analyze(projectId, [uploadResult.sample_id], 'default-style');
-      const sid = result && typeof result === 'object' && 'style_id' in result ? String((result as any).style_id) : 'default-style';
+      const result = await stylesApi.analyzeSync(projectId, [uploadResult.sample_id], 'default-style');
+      const sid = result.style_id || 'default-style';
       setStyleId(sid);
       notify('\u6587\u98CE\u5206\u6790\u5B8C\u6210', 'success');
       setStep(3);
