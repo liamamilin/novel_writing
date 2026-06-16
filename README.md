@@ -12,7 +12,7 @@
 - **导出**：TXT / Markdown / EPUB / DOCX
 - **活动追踪**：项目事件时间线 + 分享链接
 - **SSE 流式生成**：前端实时渲染生成过程
-- **57 个 REST API 端点**
+- **63 个 REST API 端点（59 REST + 4 文档）**
 
 ## 前置要求
 
@@ -59,7 +59,7 @@ npm install
 npm run dev
 ```
 
-访问 `http://localhost:3000`。点"+ 新建项目"进入三步向导。
+访问 `http://localhost:3000`。点"+ 新建项目"进入四步向导。
 
 ### 4. Docker 一键启动
 
@@ -71,7 +71,7 @@ docker compose up -d
 ## 测试
 
 ```bash
-pytest tests/ -q                          # 122 passed
+pytest tests/ -q                          # 122+ passed（基线 122）
 pytest tests/unit/ -q                     # 单元测试
 pytest tests/integration/ -q              # 集成测试 (Mock LLM)
 pytest tests/e2e/ -q                      # 端到端 (需 LLM_API_KEY)
@@ -99,18 +99,19 @@ cd frontend && npm run build              # 前端构建 (0 error)
 | Cross-Chapter Auditor | 审查层 | 跨章诊断 |
 | Reader Simulator | 审查层 | 读者视角模拟 |
 
-### 57 API 端点（53 REST + 4 文档）
+### 63 API 端点（59 REST + 4 文档）
 
 | 模块 | 端点数 | 核心功能 |
 |------|--------|---------|
-| Projects | 4 | CRUD |
-| Styles | 5 | 分析 / 样本 / CRUD / 对抗测试 |
+| Projects | 5 | CRUD + 删除 |
+| Styles | 6 | 分析 / analyze-sync / 样本 / CRUD / 测试段落 |
+| Tasks | 1 | 异步任务状态查询 |
 | Bible | 7 | 方向选择 / 角色 / 生成 / 更新 / 版本 |
 | Context | 1 | 编译上下文 |
-| Chapters | 12 | 规划 / 草稿 / SSE 流式 / 润色 / 审查 / 多读者 / 定稿 / 版本树 |
+| Chapters | 15 | 规划 / 草稿 / SSE 流式 / 润色 / 审查(含reviews) / 多读者 / 定稿 / 版本树 / 内容读写 |
 | State | 2 | 回滚 / snapshot |
 | Export | 2 | 导出任务 / 下载 |
-| Subplots | 4 | 子线 CRUD + 建议 |
+| Subplots | 5 | 子线 CRUD + 删除 + 建议 |
 | Hooks | 6 | 伏笔 CRUD + 触发 / 回收 |
 | Strategy | 3 | 读写 + 重置 |
 | Events | 1 | 时间线 |

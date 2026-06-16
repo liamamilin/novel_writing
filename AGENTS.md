@@ -33,7 +33,7 @@ npm run build     # production build (tsc + vite)
 ```
 novel_runtime/        # Python backend (FastAPI)
   agents/             # 10 LLM agents (BaseAgent subclass)
-  api/                # 57 REST endpoints
+  api/                # 63 REST endpoints (59 REST + 4 docs)
   cli/                # 15 Typer CLI commands
   compiler/           # Deterministic code (ContextAssembler, StateHealthChecker)
   llm/                # LLM provider, prompt loader, token counter, validators, cache
