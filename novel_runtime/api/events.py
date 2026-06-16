@@ -34,4 +34,4 @@ async def share_project(
     base = Path(request.app.state.settings.storage_base_path)
     EventStorage(base).record(project_id, "share_link_created", actor=body.get("actor", "user"), details={"token": token})
     ShareTokenStorage(base).save(token, project_id)
-    return {"share_token": token, "url": f"/api/shared/{token}"}
+    return {"share_token": token, "url": f"/shared/{token}"}

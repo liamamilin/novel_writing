@@ -161,7 +161,7 @@ def test_share_create(client, project_with_chapters):
     data = resp.json()
     assert "share_token" in data
     assert data["share_token"].startswith("share_")
-    assert "/api/shared/" in data["url"]
+    assert "/shared/" in data["url"]
 
 
 def test_shared_read_project(client, project_with_chapters):

@@ -157,8 +157,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if token:
             auth = request.headers.get("Authorization", "")
             if not auth.startswith("Bearer ") or auth.removeprefix("Bearer ") != token:
-                if request.url.path not in ("/health", "/metrics", "/docs", "/openapi.json") and not request.url.path.startswith("/api/shared/"):
-                    return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
+                    if request.url.path not in ("/health", "/metrics", "/docs", "/openapi.json") and not request.url.path.startswith("/api/shared/") and not request.url.path.startswith("/shared/"):
+                        return JSONResponse(status_code=401, content={"detail": "Unauthorized"})
         return await call_next(request)
 
 

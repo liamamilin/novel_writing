@@ -8,6 +8,7 @@ import { ActivityDrawer } from './components/layout/ActivityDrawer';
 import { HealthBadge } from './components/layout/HealthBadge';
 import { ProjectList } from './pages/ProjectList';
 import { ProjectCreate } from './pages/ProjectCreate';
+import { SharedReader } from './pages/SharedReader';
 import { useUIStore } from './stores/uiStore';
 import { useProjectStore } from './stores/projectStore';
 import { useChapterStore } from './stores/chapterStore';
@@ -101,6 +102,7 @@ export default function App() {
           <Route path="/" element={<ProjectList />} />
           <Route path="/project/new" element={<ProjectCreate />} />
           <Route path="/project/:id" element={<MainLayout />} />
+          <Route path="/shared/:token" element={<SharedReader />} />
         </Routes>
       </BrowserRouter>
     </QueryClientProvider>
