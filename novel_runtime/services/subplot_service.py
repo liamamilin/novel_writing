@@ -42,6 +42,9 @@ class SubplotService:
             "status": new_status,
         })
 
+    def delete_subplot(self, project_id: str, subplot_id: str) -> bool:
+        return subplot_storage.delete_subplot(self._project_path(project_id), subplot_id)
+
     def list_subplots(self, project_id: str, status: str | None = None) -> list[Subplot]:
         all_sp = subplot_storage.load_subplots(self._project_path(project_id))
         if status:

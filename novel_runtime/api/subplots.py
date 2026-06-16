@@ -43,6 +43,15 @@ async def update_subplot(
     return svc.update_subplot(project_id, subplot_id, body)
 
 
+@router.delete("/{subplot_id}")
+async def delete_subplot(
+    project_id: str, subplot_id: str,
+    svc: SubplotService = Depends(get_service),
+):
+    ok = svc.delete_subplot(project_id, subplot_id)
+    return {"deleted": ok}
+
+
 @router.get("/suggestions")
 async def suggest_subplots(
     project_id: str, chapter_number: int,
