@@ -1,0 +1,35 @@
+[project]
+name = "novel-runtime"
+version = "0.1.0"
+description = "Novel Writing Runtime - 自动化小说边写系统"
+requires-python = ">=3.10"
+dependencies = [
+    "fastapi>=0.104.0",
+    "uvicorn>=0.24.0",
+    "pydantic>=2.5.0",
+    "pydantic-settings>=2.1.0",
+    "pyyaml>=6.0",
+    "httpx>=0.25.0",
+    "typer>=0.9.0",
+    "rich>=13.0.0",
+    "python-slugify>=8.0.0",
+    "tiktoken>=0.5.0",
+    "python-json-logger>=2.0.0",
+    "prometheus-fastapi-instrumentator>=7.0.0",
+    "slowapi>=0.1.9",
+    "ebooklib>=0.18",
+    "python-docx>=1.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.0",
+    "pytest-cov>=4.1.0",
+    "httpx",
+]
+
+[tool.setuptools.packages.find]
+include = ["novel_runtime*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

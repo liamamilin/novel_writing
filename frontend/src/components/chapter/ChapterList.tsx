@@ -1,0 +1,72 @@
+import { useEffect } from 'react';
+import { useProjectStore } from '../../stores/projectStore';
+import { useChapterStore } from '../../stores/chapterStore';
+import { useUIStore } from '../../stores/uiStore';
+
+const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
+  planned: { bg: 'bg-gray-200', text: 'text-gray-600', label: '\u89C4\u5212' },
+  drafted: { bg: 'bg-yellow-200', text: 'text-yellow-700', label: '\u8349\u7A3F' },
+  reviewed: { bg: 'bg-blue-200', text: 'text-blue-700', label: '\u5DF2\u5BA1\u67E5' },
+  approved: { bg: 'bg-green-200', text: 'text-green-700', label: '\u5DF2\u786E\u8BA4' },
+  locked: { bg: 'bg-gray-400', text: 'text-gray-800', label: '\u5DF2\u9501\u5B9A' },
+};
+
+export function ChapterList() {
+  const currentProject = useProjectStore((s) => s.currentProject);
+  const chapters = useChapterStore((s) => s.chapters);
+  const currentChapter = useChapterStore((s) => s.currentChapter);
+  const loadChapters = useChapterStore((s) => s.loadChapters);
+  const setCurrentChapter = useChapterStore((s) => s.setCurrentChapter);
+  const selectAsset = useUIStore((s) => s.selectAsset);
+
+  useEffect(() => {
+    if (currentProject) {
+      loadChapters(currentProject.project_id);
+    }
+  }, [currentProject, loadChapters]);
+
+  if (!currentProject) {
+    return (
+      <div className="text-sm text-gray-400 px-2 py-4">
+        \u8BF7\u5148\u9009\u62E9\u9879\u76EE
+      </div>
+    );
+  }
+
+  if (chapters.length === 0) {
+    return (
+      <div className="text-sm text-gray-400 px-2 py-4">
+        \u6682\u65E0\u7AE0\u8282\uFF0C\u8BF7\u5148\u751F\u6210\u89C4\u5212
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-1">
+      <h3 className="font-semibold text-sm text-gray-500 uppercase mb-1 px-2">\u7AE0\u8282</h3>
+      {chapters.map((ch) => {
+        const cfg = statusConfig[ch.status] || statusConfig.planned;
+        return (
+          <button
+            key={ch.chapter_id}
+            onClick={() => {
+              setCurrentChapter(ch);
+              selectAsset({ type: 'chapter', id: ch.chapter_id });
+            }}
+            className={`w-full text-left px-3 py-1.5 text-sm rounded hover:bg-gray-100 transition-colors flex items-center justify-between ${
+              currentChapter?.chapter_id === ch.chapter_id ? 'bg-blue-50 text-blue-700 font-medium' : 'text-gray-700'
+            }`}
+          >
+            <span>
+              \u7B2C {ch.chapter_number} \u7AE0
+              {ch.title ? ` \u2014 ${ch.title}` : ''}
+            </span>
+            <span className={`text-xs px-1.5 py-0.5 rounded ${cfg.bg} ${cfg.text}`}>
+              {cfg.label}
+            </span>
+          </button>
+        );
+      })}
+    </div>
+  );
+}

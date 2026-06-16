@@ -1,0 +1,113 @@
+{
+  "title": "Novel Writing Runtime - Overview",
+  "uid": "nwr-overview",
+  "tags": ["nwr"],
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "time": { "from": "now-1h", "to": "now" },
+  "timepicker": {},
+  "panels": [
+    {
+      "id": 1,
+      "title": "LLM Calls / min",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(nwr_llm_calls_total[1m])",
+          "legendFormat": "{{agent}} {{status}}",
+          "interval": "30s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "cpm",
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "LLM Latency (p50/p95)",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 8, "y": 0 },
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.50, rate(nwr_llm_latency_seconds_bucket[5m]))",
+          "legendFormat": "p50 {{agent}}"
+        },
+        {
+          "expr": "histogram_quantile(0.95, rate(nwr_llm_latency_seconds_bucket[5m]))",
+          "legendFormat": "p95 {{agent}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s",
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Token Usage",
+      "type": "timeseries",
+      "gridPos": { "h": 8, "w": 8, "x": 16, "y": 0 },
+      "targets": [
+        {
+          "expr": "rate(nwr_llm_tokens_total[1m])",
+          "legendFormat": "{{agent}} {{type}}",
+          "interval": "30s"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "tok/s",
+          "custom": { "drawStyle": "line", "lineInterpolation": "smooth" }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "Chapter Status",
+      "type": "stat",
+      "gridPos": { "h": 8, "w": 8, "x": 0, "y": 8 },
+      "targets": [
+        {
+          "expr": "nwr_chapter_status_count",
+          "legendFormat": "{{project}} {{status}}"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "none",
+          "color": {
+            "mode": "palette-classic"
+          }
+        }
+      },
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "values": true,
+          "calcs": ["lastNotNull"]
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Task Duration",
+      "type": "heatmap",
+      "gridPos": { "h": 8, "w": 16, "x": 8, "y": 8 },
+      "targets": [
+        {
+          "expr": "rate(nwr_task_duration_seconds_bucket[5m])",
+          "format": "heatmap",
+          "legendFormat": "{{le}}"
+        }
+      ],
+      "tooltip": { "show": true, "showHistogram": true }
+    }
+  ]
+}
