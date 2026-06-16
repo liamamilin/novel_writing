@@ -1,19 +1,17 @@
 from __future__ import annotations
+
 import logging
 import time
-from datetime import datetime
-from pathlib import Path
 from uuid import uuid4
 
 from fastapi import BackgroundTasks
 
-from novel_runtime.agents.base import BaseAgent, AgentResult
+from novel_runtime.agents.base import AgentResult, BaseAgent
 from novel_runtime.db.database import Database
 from novel_runtime.db.task_repo import TaskRepo
 from novel_runtime.exceptions import InvalidStateTransitionError
 from novel_runtime.metrics import task_duration_seconds
 from novel_runtime.models.task import Task
-
 
 logger = logging.getLogger("novel_runtime.services.task_service")
 

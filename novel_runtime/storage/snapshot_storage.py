@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from datetime import datetime
 from pathlib import Path
 
@@ -38,7 +39,7 @@ class SnapshotManager:
         if not snapshot_path.exists():
             raise SnapshotNotFoundError(f"Snapshot for chapter {chapter_number} not found")
 
-        with open(snapshot_path, "r", encoding="utf-8") as f:
+        with open(snapshot_path, encoding="utf-8") as f:
             snapshot = yaml.safe_load(f)
 
         if snapshot is None:
@@ -58,7 +59,7 @@ class SnapshotManager:
 
         project_yaml_path = project_path / "project.yaml"
         if project_yaml_path.exists():
-            with open(project_yaml_path, "r", encoding="utf-8") as f:
+            with open(project_yaml_path, encoding="utf-8") as f:
                 project_data = yaml.safe_load(f) or {}
             project_data["current_chapter_id"] = f"chapter_{chapter_number:03d}"
             with open(project_yaml_path, "w", encoding="utf-8") as f:

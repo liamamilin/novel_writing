@@ -1,12 +1,12 @@
 from __future__ import annotations
+
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
 
-from novel_runtime.storage.project_storage import ProjectStorage
 from novel_runtime.storage.chapter_storage import load_chapter_file
+from novel_runtime.storage.project_storage import ProjectStorage
 from novel_runtime.storage.share_token_storage import ShareTokenStorage
-
 
 router = APIRouter(prefix="/api/shared", tags=["shared"])
 

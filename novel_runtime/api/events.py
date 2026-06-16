@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from pathlib import Path
 from uuid import uuid4
 
@@ -6,7 +7,6 @@ from fastapi import APIRouter, Request
 
 from novel_runtime.storage.event_storage import EventStorage
 from novel_runtime.storage.share_token_storage import ShareTokenStorage
-
 
 router = APIRouter(prefix="/api/projects/{project_id}", tags=["events"])
 

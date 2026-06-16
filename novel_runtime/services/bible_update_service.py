@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from pathlib import Path
 
 from novel_runtime.models.bible import BibleUpdateItem, BibleUpdateProposal

@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal, Optional
+from typing import Literal
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -15,18 +15,18 @@ class ProjectCreate(BaseModel):
 
 
 class ProjectUpdate(BaseModel):
-    project_name: Optional[str] = None
-    genre: Optional[str] = None
-    idea: Optional[str] = None
-    target_reader: Optional[str] = None
-    core_selling_point: Optional[str] = None
-    target_style: Optional[str] = None
-    status: Optional[Literal["draft", "active", "paused", "archived"]] = None
-    default_style_id: Optional[str] = None
-    current_volume_id: Optional[str] = None
-    current_chapter_id: Optional[str] = None
-    bible_version: Optional[int] = None
-    writing_strategy_id: Optional[str] = None
+    project_name: str | None = None
+    genre: str | None = None
+    idea: str | None = None
+    target_reader: str | None = None
+    core_selling_point: str | None = None
+    target_style: str | None = None
+    status: Literal["draft", "active", "paused", "archived"] | None = None
+    default_style_id: str | None = None
+    current_volume_id: str | None = None
+    current_chapter_id: str | None = None
+    bible_version: int | None = None
+    writing_strategy_id: str | None = None
 
 
 class Project(BaseModel):

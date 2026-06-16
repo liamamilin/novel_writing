@@ -3,6 +3,10 @@ export interface Project {
   project_name: string;
   genre: string;
   status: string;
+  idea?: string;
+  target_reader?: string;
+  core_selling_point?: string;
+  target_style?: string;
   default_style_id?: string;
   current_chapter_id?: string;
   bible_version?: number;

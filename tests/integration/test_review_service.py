@@ -1,13 +1,14 @@
 from __future__ import annotations
+
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
 from novel_runtime.db.database import Database
-from novel_runtime.services.project_service import ProjectService
-from novel_runtime.models.project import ProjectCreate
 from novel_runtime.llm.prompt_loader import PromptLoader
-from pathlib import Path
+from novel_runtime.models.project import ProjectCreate
+from novel_runtime.services.project_service import ProjectService
 
 
 @pytest.fixture
@@ -20,7 +21,7 @@ def review_env(tmp_path):
     prompts_dir = tmp_path / "prompts"
     prompts_dir.mkdir()
     for name in ["continuity_review", "quality_review"]:
-        (prompts_dir / f"{name}.md").write_text(f"DRAFT: {{{{styled_draft}}}}")
+        (prompts_dir / f"{name}.md").write_text("DRAFT: {{styled_draft}}")
 
     mock_provider = MagicMock()
     mock_provider.generate_with_usage.return_value = (
@@ -91,8 +92,8 @@ class TestReviewIntegration:
         chapters_dir = project_path / "chapters"
         chapters_dir.mkdir(parents=True, exist_ok=True)
 
-        from novel_runtime.storage.project_storage import ProjectStorage
         from novel_runtime.models.chapter import Chapter
+        from novel_runtime.storage.project_storage import ProjectStorage
         chapter = Chapter(
             chapter_id="chapter_001", chapter_number=1, status="drafted",
         )

@@ -1,9 +1,9 @@
 from __future__ import annotations
+
 from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
-
 
 SAMPLE_STYLE_TEXT = """
 林云推开拍卖会的大门，刺眼的水晶灯光倾泻而下。他的目光扫过大厅，每一个角落都藏着算计和阴谋。
@@ -74,8 +74,8 @@ def test_style_sample(tmp_path):
 @pytest.fixture
 def full_project(tmp_path, mock_e2e_provider):
     from novel_runtime.db.database import Database
-    from novel_runtime.services.project_service import ProjectService
     from novel_runtime.models.project import ProjectCreate
+    from novel_runtime.services.project_service import ProjectService
 
     db = Database(str(tmp_path / "test.db"))
     db.init_db()

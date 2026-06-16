@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -8,7 +9,7 @@ from novel_runtime.config import Settings
 from novel_runtime.db.database import Database
 from novel_runtime.llm.prompt_loader import PromptLoader
 from novel_runtime.models.project import ProjectCreate
-from novel_runtime.models.style import StyleAsset, CharacterVoice
+from novel_runtime.models.style import CharacterVoice, StyleAsset
 from novel_runtime.services.project_service import ProjectService
 from novel_runtime.services.style_service import StyleService
 

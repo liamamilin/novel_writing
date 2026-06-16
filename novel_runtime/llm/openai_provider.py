@@ -1,15 +1,15 @@
 from __future__ import annotations
+
 import logging
 import os
 import time
-from typing import Iterator
+from collections.abc import Iterator
 
 import httpx
 
 from novel_runtime.exceptions import LLMCallError
 from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.metrics import llm_calls_total, llm_latency_seconds, llm_tokens_total
-
 
 logger = logging.getLogger("novel_runtime.llm.openai_provider")
 
@@ -90,9 +90,9 @@ class OpenAICompatibleProvider(LLMProvider):
                         headers={"Authorization": f"Bearer {self.api_key}"},
                     )
                     if response.status_code == 401:
-                        raise LLMCallError(f"Authentication failed (401). Check API key.")
+                        raise LLMCallError("Authentication failed (401). Check API key.")
                     if response.status_code == 429:
-                        raise LLMCallError(f"Rate limited (429). Retrying...")
+                        raise LLMCallError("Rate limited (429). Retrying...")
                     if response.status_code >= 500:
                         raise LLMCallError(f"Server error ({response.status_code}). Retrying...")
                     response.raise_for_status()

@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from datetime import datetime
 from pathlib import Path
 
@@ -6,8 +7,8 @@ import yaml
 
 from novel_runtime.agents.story_architect import StoryArchitectAgent
 from novel_runtime.db.database import Database
-from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.llm.prompt_loader import PromptLoader
+from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.models.project import ProjectUpdate
 from novel_runtime.models.strategy import WritingStrategy
 from novel_runtime.models.subplot import Subplot
@@ -63,19 +64,17 @@ class BibleService:
         return {}
 
     def select_direction(self, project_id: str, variant_id: int, modifications: str = "") -> dict:
-        project = self.project_service.get_project(project_id)
+        self.project_service.get_project(project_id)
         project_path = self.project_service.get_project_path(project_id)
         direction_path = project_path / "bible" / "selected_direction.yaml"
-        import json
         data = {"variant_id": variant_id, "modifications": modifications, "timestamp": str(datetime.now())}
         direction_path.write_text(yaml.dump(data, allow_unicode=True), encoding="utf-8")
         return data
 
     def confirm_characters(self, project_id: str, character_adjustments: dict) -> dict:
-        project = self.project_service.get_project(project_id)
+        self.project_service.get_project(project_id)
         project_path = self.project_service.get_project_path(project_id)
         confirm_path = project_path / "bible" / "character_adjustments.yaml"
-        import json
         data = {"adjustments": character_adjustments, "timestamp": str(datetime.now())}
         confirm_path.write_text(yaml.dump(data, allow_unicode=True), encoding="utf-8")
         return data
@@ -86,7 +85,7 @@ class BibleService:
         if not result.success or not result.data:
             return {}
         raw = result.data
-        parts = raw.split("---PART")
+        raw.split("---PART")
         part_map = {}
         for i, filename in enumerate(["novel_bible.md", "world_setting.md", "character_profiles.md", "volume_plan.md", "chapter_plan.md"]):
             key = f"PART {i+1}"
@@ -113,7 +112,7 @@ class BibleService:
         return part_map
 
     def _generate_initial_strategy(self, project_path: Path, genre: str, direction: dict):
-        from novel_runtime.models.strategy import ChapterLengthConfig, PacingStrategyConfig
+        from novel_runtime.models.strategy import ChapterLengthConfig
         strategy = WritingStrategy(name=f"{direction.get('name', 'default')}策略")
         pacing = direction.get("pacing_style", "")
         if "爽文" in pacing or "快" in pacing:

@@ -1,12 +1,13 @@
 from __future__ import annotations
+
+import tempfile
+from pathlib import Path
 from unittest.mock import MagicMock
 
 import pytest
 
 from novel_runtime.compiler.fix_instruction_merger import merge_reviews
 from novel_runtime.llm.prompt_loader import PromptLoader
-from pathlib import Path
-import tempfile
 
 
 class TestFixInstructionMerger:
@@ -25,7 +26,7 @@ class TestFixInstructionMerger:
     def test_merge_quality_scores(self):
         scores = {"开头": 5, "冲突": 7, "节奏": 4}
         result = merge_reviews([], scores, [], "")
-        fix_ids = [f.fix_id for f in result.fix_instructions]
+        [f.fix_id for f in result.fix_instructions]
         # scores < 6 should generate fix instructions
         assert any(f.severity == "low" and "开头" in f.problem for f in result.fix_instructions)
         assert any(f.severity == "low" and "节奏" in f.problem for f in result.fix_instructions)

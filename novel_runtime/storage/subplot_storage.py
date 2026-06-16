@@ -1,8 +1,9 @@
 from __future__ import annotations
+
 from pathlib import Path
 
 from novel_runtime.models.subplot import Subplot
-from novel_runtime.storage.base import write_yaml, read_yaml, write_yaml_model, read_yaml_model
+from novel_runtime.storage.base import read_yaml, read_yaml_model, write_yaml, write_yaml_model
 
 
 def _subplots_dir(project_path: Path) -> Path:

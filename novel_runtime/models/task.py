@@ -4,7 +4,6 @@ from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
-
 TASK_TYPES = Literal[
     "style_analysis", "bible_generation", "bible_direction", "bible_character",
     "context_compile", "chapter_plan", "chapter_draft", "narrative_polish",

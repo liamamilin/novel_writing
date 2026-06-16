@@ -1,21 +1,27 @@
 from __future__ import annotations
-import yaml
+
 from pathlib import Path
 
+import yaml
+
 from novel_runtime.agents.chapter_planner import ChapterPlannerAgent, ChapterPlanResult
-from novel_runtime.agents.chapter_writer import ChapterWriterAgent, ChapterWriteResult, ChapterWriterOutputResult
+from novel_runtime.agents.chapter_writer import ChapterWriterAgent, ChapterWriteResult
 from novel_runtime.agents.narrative_polisher import NarrativePolisherAgent
 from novel_runtime.compiler.plan_validator import PlanValidator
 from novel_runtime.exceptions import ChapterNotFoundError, InvalidStateTransitionError, StyleNotSetError
-from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.llm.prompt_loader import PromptLoader
-from novel_runtime.models.style import StyleAsset
+from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.models.chapter import AgentContract
-from novel_runtime.services.project_service import ProjectService
-from novel_runtime.storage import strategy_storage, style_storage, state_storage
-from novel_runtime.storage.chapter_storage import save_chapter_file, load_chapter_file, save_draft_version, mark_reviews_stale
-from novel_runtime.storage.project_storage import ProjectStorage
+from novel_runtime.models.style import StyleAsset
 from novel_runtime.services.context_service import ContextService
+from novel_runtime.services.project_service import ProjectService
+from novel_runtime.storage import state_storage, strategy_storage, style_storage
+from novel_runtime.storage.chapter_storage import (
+    load_chapter_file,
+    save_chapter_file,
+    save_draft_version,
+)
+from novel_runtime.storage.project_storage import ProjectStorage
 
 
 class ChapterService:
@@ -179,9 +185,9 @@ class ChapterService:
         except FileNotFoundError:
             draft = ""
         try:
-            plan = load_chapter_file(project_path, chapter_number, "plan")
+            load_chapter_file(project_path, chapter_number, "plan")
         except FileNotFoundError:
-            plan = ""
+            pass
 
         style_id = project.default_style_id
         try:
@@ -192,7 +198,7 @@ class ChapterService:
         style_params = yaml.dump(style.model_dump(), allow_unicode=True, default_flow_style=False)
         rhythm_type = chapter.rhythm_type or ""
 
-        characters = state_storage.load_characters(project_path)
+        state_storage.load_characters(project_path)
         voices = style_storage.list_character_voices(project_path)
         voice_params = "\n".join(f"- {v.character_name}: {v.speech_patterns}" for v in voices)
 

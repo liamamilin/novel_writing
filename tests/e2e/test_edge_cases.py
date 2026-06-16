@@ -1,15 +1,17 @@
 from __future__ import annotations
 
-import pytest
 from pathlib import Path
+
+import pytest
 
 from novel_runtime.exceptions import InvalidStateTransitionError
 
 
 class TestEdgeCases:
     def test_empty_style_analysis(self, tmp_path):
-        from novel_runtime.agents.style_analyst import StyleAnalystAgent
         from unittest.mock import MagicMock
+
+        from novel_runtime.agents.style_analyst import StyleAnalystAgent
         from novel_runtime.llm.prompt_loader import PromptLoader
 
         prompts_dir = tmp_path / "prompts"
@@ -42,15 +44,16 @@ class TestEdgeCases:
             pass
 
     def test_rollback_nonexistent(self, tmp_path):
-        from novel_runtime.storage.snapshot_storage import SnapshotManager
         from novel_runtime.exceptions import SnapshotNotFoundError
+        from novel_runtime.storage.snapshot_storage import SnapshotManager
         mgr = SnapshotManager()
         with pytest.raises(SnapshotNotFoundError):
             mgr.restore_snapshot(tmp_path, 999)
 
     def test_llm_call_failure_retry(self, tmp_path):
-        from novel_runtime.llm.openai_provider import OpenAICompatibleProvider
         import os
+
+        from novel_runtime.llm.openai_provider import OpenAICompatibleProvider
         key = os.environ.get("LLM_API_KEY", "")
         if not key:
             pytest.skip("No API key")

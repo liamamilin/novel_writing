@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from novel_runtime.exceptions import TokenBudgetExceededError
-
 
 class TokenCounter:
     def __init__(self):

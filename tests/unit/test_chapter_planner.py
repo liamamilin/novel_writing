@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -127,4 +128,4 @@ test
         plan = result.data
         assert plan.rhythm.rhythm_type == "递进型"
         assert len(plan.agent_contract.promises) >= 1
-        assert len(scenes := [l for l in sample.split("\n") if "### Scene" in l]) >= 1
+        assert len([line for line in sample.split("\n") if "### Scene" in line]) >= 1

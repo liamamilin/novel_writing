@@ -1,5 +1,5 @@
 from __future__ import annotations
-from pathlib import Path
+
 from uuid import uuid4
 
 import yaml
@@ -7,15 +7,18 @@ import yaml
 from novel_runtime.agents.state_updater import StateUpdaterAgent
 from novel_runtime.compiler.state_diff import StateDiffer
 from novel_runtime.compiler.state_health_checker import StateHealthChecker
-from novel_runtime.exceptions import ChapterNotFoundError, InvalidStateTransitionError
-from novel_runtime.llm.provider import LLMProvider
+from novel_runtime.exceptions import InvalidStateTransitionError
 from novel_runtime.llm.prompt_loader import PromptLoader
+from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.models.hook import Hook
 from novel_runtime.services.bible_update_service import BibleUpdateService
-from novel_runtime.services.project_service import ProjectService
 from novel_runtime.services.hook_service import HookService
+from novel_runtime.services.project_service import ProjectService
 from novel_runtime.storage import state_storage, strategy_storage, subplot_storage
-from novel_runtime.storage.chapter_storage import load_chapter_file, save_chapter_file, chapter_file_exists, freeze_chapter, unfreeze_chapter
+from novel_runtime.storage.chapter_storage import (
+    load_chapter_file,
+    save_chapter_file,
+)
 from novel_runtime.storage.snapshot_storage import SnapshotManager
 
 
@@ -119,7 +122,7 @@ class StateService:
             for sa in update_result.subplot_advances:
                 sid = sa.get("subplot_id", "")
                 if sid:
-                    advancement = sa.get("advancement", "")
+                    sa.get("advancement", "")
                     subplot_storage.update_subplot(project_path, sid, {
                         "last_advanced": f"chapter_{chapter_number:03d}",
                         "chapters_since_advance": 0,

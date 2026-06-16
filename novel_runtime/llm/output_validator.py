@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import json
 import re
 from typing import Any
@@ -59,9 +60,9 @@ class YAMLValidator(BaseValidator):
 
         for field, expected_type in self.field_types.items():
             if field in data and data[field] is not None:
-                if expected_type == list and not isinstance(data[field], list):
+                if expected_type is list and not isinstance(data[field], list):
                     errors.append(f"Field '{field}' should be a list")
-                elif expected_type == dict and not isinstance(data[field], dict):
+                elif expected_type is dict and not isinstance(data[field], dict):
                     errors.append(f"Field '{field}' should be a dict")
 
         return ValidationResult(len(errors) == 0, parsed_data=data, errors=errors, raw_output=raw_output)

@@ -5,7 +5,6 @@ from fastapi import APIRouter, Depends, Request
 from novel_runtime.services.project_service import ProjectService
 from novel_runtime.services.strategy_service import StrategyService
 
-
 router = APIRouter(prefix="/api/projects/{project_id}/strategy", tags=["strategy"])
 
 

@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from novel_runtime.models.subplot import Subplot
 from novel_runtime.services.project_service import ProjectService
-from novel_runtime.storage import subplot_storage, strategy_storage
+from novel_runtime.storage import strategy_storage, subplot_storage
 
 
 class SubplotService:

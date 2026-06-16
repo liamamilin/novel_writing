@@ -15,13 +15,14 @@ class TestMinimalLoop:
         assert (project_path / "states" / "story_state.yaml").exists()
 
     def test_step_2_style_analysis(self, full_project):
-        from novel_runtime.services.style_service import StyleService
-        from novel_runtime.llm.prompt_loader import PromptLoader
         from novel_runtime.config import Settings
+        from novel_runtime.llm.prompt_loader import PromptLoader
+        from novel_runtime.services.style_service import StyleService
 
         project, project_svc, tmp_path = full_project
-        from tests.e2e.conftest import mock_e2e_provider
         from unittest.mock import MagicMock
+
+        from tests.e2e.conftest import mock_e2e_provider
         provider = MagicMock()
         provider.generate_with_usage.return_value = (
             "narration: 第三人称贴身视角\nsentence_rhythm: 短句为主\ndialogue_style: 直接冲突型\n"
@@ -43,13 +44,14 @@ class TestMinimalLoop:
         assert "短句" in style.sentence_rhythm
 
     def test_step_3_context_compile(self, full_project):
+        from unittest.mock import MagicMock
+
+        from novel_runtime.config import Settings
         from novel_runtime.llm.prompt_loader import PromptLoader
         from novel_runtime.llm.provider import create_provider
-        from novel_runtime.services.context_service import ContextService
-        from novel_runtime.config import Settings
         from novel_runtime.models.style import StyleAsset
+        from novel_runtime.services.context_service import ContextService
         from novel_runtime.storage import style_storage
-        from unittest.mock import MagicMock
 
         project, project_svc, tmp_path = full_project
         project_path = tmp_path / project.project_id
@@ -77,12 +79,13 @@ class TestMinimalLoop:
         assert "health_issues" in result
 
     def test_step_4_chapter_plan(self, full_project):
-        from novel_runtime.services.chapter_service import ChapterService
-        from novel_runtime.llm.prompt_loader import PromptLoader
-        from novel_runtime.models.style import StyleAsset
-        from novel_runtime.models.project import ProjectUpdate
-        from novel_runtime.storage import style_storage
         from unittest.mock import MagicMock
+
+        from novel_runtime.llm.prompt_loader import PromptLoader
+        from novel_runtime.models.project import ProjectUpdate
+        from novel_runtime.models.style import StyleAsset
+        from novel_runtime.services.chapter_service import ChapterService
+        from novel_runtime.storage import style_storage
 
         project, project_svc, tmp_path = full_project
         project_path = tmp_path / project.project_id
@@ -122,9 +125,9 @@ class TestMinimalLoop:
             assert "chapter_plan.md" in result["plan_path"]
 
     def test_step_5_state_snapshot(self, full_project):
-        from novel_runtime.storage.snapshot_storage import SnapshotManager
-        from novel_runtime.storage import state_storage
         from novel_runtime.models.character import CharacterState
+        from novel_runtime.storage import state_storage
+        from novel_runtime.storage.snapshot_storage import SnapshotManager
 
         project, project_svc, tmp_path = full_project
         project_path = tmp_path / project.project_id

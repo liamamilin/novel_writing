@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, Request
-from fastapi import HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 
 from novel_runtime.db.database import Database
 from novel_runtime.db.task_repo import TaskRepo
-from novel_runtime.models.task import Task
-
 
 router = APIRouter(prefix="/api/projects/{project_id}/tasks", tags=["tasks"])
 

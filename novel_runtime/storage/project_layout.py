@@ -1,11 +1,8 @@
 from __future__ import annotations
+
 from pathlib import Path
 
-import yaml
-
-from novel_runtime.exceptions import ProjectNotFoundError
 from novel_runtime.storage.base import write_yaml
-
 
 INITIAL_STORY_STATE = {
     "current_location": "",

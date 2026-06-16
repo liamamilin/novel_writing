@@ -1,15 +1,15 @@
 from __future__ import annotations
+
 import logging
 from dataclasses import dataclass, field
 from typing import Any
 
 from novel_runtime.llm.output_validator import (
     BaseValidator,
-    ValidationResult,
     validate_with_retry,
 )
-from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.llm.prompt_loader import PromptLoader
+from novel_runtime.llm.provider import LLMProvider
 
 
 @dataclass

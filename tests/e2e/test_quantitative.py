@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from novel_runtime.models.hook import Hook
 from novel_runtime.models.chapter import Chapter
 from novel_runtime.models.character import CharacterState
+from novel_runtime.models.hook import Hook
 from novel_runtime.models.strategy import WritingStrategy
 from novel_runtime.storage import state_storage, subplot_storage
 
@@ -22,7 +22,7 @@ class TestContinuityMetrics:
         assert len(same_name) == 1
 
     def test_timeline_events_consistent(self, tmp_path):
-        from novel_runtime.models.timeline import TimelineEvent, StoryTime
+        from novel_runtime.models.timeline import StoryTime, TimelineEvent
         events = [
             TimelineEvent(event_id="e1", chapter_id="ch1", story_time=StoryTime(start="day1", end="day1")),
             TimelineEvent(event_id="e2", chapter_id="ch2", story_time=StoryTime(start="day2", end="day2")),
@@ -46,7 +46,7 @@ class TestQualityMetrics:
 
     def test_styled_draft_has_scene_separators(self, tmp_path):
         draft = "### Scene 1\n内容\n### Scene 2\n内容"
-        scenes = [l for l in draft.split("\n") if l.startswith("### Scene")]
+        scenes = [line for line in draft.split("\n") if line.startswith("### Scene")]
         assert len(scenes) >= 2
 
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
+
 import json
-from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
@@ -34,7 +34,7 @@ class EventStorage:
         path = self._events_path(project_id)
         if not path.exists():
             return []
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             lines = f.readlines()
         events = []
         for line in lines[offset:offset + limit]:

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from novel_runtime.agents.base import BaseAgent, AgentResult
+from novel_runtime.agents.base import AgentResult, BaseAgent
 from novel_runtime.llm.output_validator import MarkdownValidator
 from novel_runtime.models.chapter import AgentContract, ChapterPlanRhythm, SubplotAllocation
 
@@ -81,7 +81,6 @@ class ChapterPlannerAgent(BaseAgent):
     def _extract_contract(self, text: str) -> AgentContract:
         contract = AgentContract()
         in_contract = False
-        current_key = None
         for line in text.split("\n"):
             stripped = line.strip()
             if "Agent Contract" in stripped:

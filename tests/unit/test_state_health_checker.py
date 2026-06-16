@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from pathlib import Path
 
 import pytest
@@ -6,8 +7,8 @@ import pytest
 from novel_runtime.compiler.state_health_checker import StateHealthChecker
 from novel_runtime.models.character import CharacterState, NarrativeRole
 from novel_runtime.models.hook import Hook
-from novel_runtime.models.subplot import Subplot
 from novel_runtime.models.strategy import WritingStrategy
+from novel_runtime.models.subplot import Subplot
 from novel_runtime.storage import state_storage, subplot_storage
 
 

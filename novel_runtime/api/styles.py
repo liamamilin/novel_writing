@@ -2,19 +2,18 @@ from __future__ import annotations
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Request
 
-from novel_runtime.models.style import StyleAsset, CharacterVoice
 from novel_runtime.services.style_service import StyleService
-
 
 router = APIRouter(prefix="/api/projects/{project_id}/styles", tags=["styles"])
 
 
 def get_style_service(request: Request) -> StyleService:
-    from novel_runtime.config import Settings
-    from novel_runtime.llm.provider import create_provider
-    from novel_runtime.llm.prompt_loader import PromptLoader
-    from novel_runtime.services.project_service import ProjectService
     from pathlib import Path
+
+    from novel_runtime.config import Settings
+    from novel_runtime.llm.prompt_loader import PromptLoader
+    from novel_runtime.llm.provider import create_provider
+    from novel_runtime.services.project_service import ProjectService
 
     settings: Settings = request.app.state.settings
     db = request.app.state.db

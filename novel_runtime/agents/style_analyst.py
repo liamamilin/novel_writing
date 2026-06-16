@@ -4,7 +4,7 @@ from dataclasses import dataclass
 
 import yaml
 
-from novel_runtime.agents.base import BaseAgent, AgentResult
+from novel_runtime.agents.base import AgentResult, BaseAgent
 from novel_runtime.llm.output_validator import YAMLValidator
 from novel_runtime.models.style import StyleAsset
 

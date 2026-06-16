@@ -1,16 +1,17 @@
 from __future__ import annotations
+
 from pathlib import Path
 
 import pytest
 
 from novel_runtime.compiler.context_assembler import ContextAssembler
 from novel_runtime.db.database import Database
+from novel_runtime.llm.token_counter import TokenBudgetManager
 from novel_runtime.models.project import ProjectCreate
-from novel_runtime.models.style import StyleAsset, ConditionalRule
+from novel_runtime.models.style import ConditionalRule, StyleAsset
 from novel_runtime.services.project_service import ProjectService
 from novel_runtime.services.style_service import StyleService
-from novel_runtime.storage import style_storage, state_storage, bible_storage
-from novel_runtime.llm.token_counter import TokenBudgetManager
+from novel_runtime.storage import bible_storage, state_storage, style_storage
 
 
 @pytest.fixture

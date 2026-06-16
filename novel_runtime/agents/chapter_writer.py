@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import yaml
 
-from novel_runtime.agents.base import BaseAgent, AgentResult
-from novel_runtime.models.style import StyleAsset, CharacterVoice
+from novel_runtime.agents.base import AgentResult, BaseAgent
 from novel_runtime.models.chapter import AgentContract
+from novel_runtime.models.style import CharacterVoice, StyleAsset
 
 
 class ChapterWriteResult:

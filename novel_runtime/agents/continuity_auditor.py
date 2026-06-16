@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import re
 
-from novel_runtime.agents.base import BaseAgent, AgentResult
+from novel_runtime.agents.base import AgentResult, BaseAgent
 from novel_runtime.llm.output_validator import MarkdownValidator
 
 

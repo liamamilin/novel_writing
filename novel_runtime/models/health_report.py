@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -10,9 +9,9 @@ class HealthIssue(BaseModel):
     severity: str = "warning"
     description: str = ""
     suggestion: str = ""
-    character_id: Optional[str] = None
-    hook_id: Optional[str] = None
-    subplot_id: Optional[str] = None
+    character_id: str | None = None
+    hook_id: str | None = None
+    subplot_id: str | None = None
 
 
 class StateHealthReport(BaseModel):

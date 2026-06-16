@@ -2,9 +2,8 @@ from __future__ import annotations
 
 from fastapi import APIRouter, Depends, Request
 
-from novel_runtime.services.project_service import ProjectService
 from novel_runtime.services.hook_service import HookService
-
+from novel_runtime.services.project_service import ProjectService
 
 router = APIRouter(prefix="/api/projects/{project_id}/hooks", tags=["hooks"])
 

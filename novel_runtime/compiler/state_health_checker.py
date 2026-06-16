@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 from pathlib import Path
 
-from novel_runtime.models.health_report import StateHealthReport, HealthIssue
+from novel_runtime.models.health_report import HealthIssue, StateHealthReport
 from novel_runtime.models.strategy import WritingStrategy
 from novel_runtime.storage import state_storage, subplot_storage
 from novel_runtime.storage.chapter_storage import load_chapter_file
@@ -123,7 +124,7 @@ class StateHealthChecker:
                 type="subplot_overload",
                 severity="warning",
                 description=f"同时活跃子线{len(active)}条，超过上限{max_active}",
-                suggestion=f"考虑推进部分子线到解决状态",
+                suggestion="考虑推进部分子线到解决状态",
             )]
         return []
 

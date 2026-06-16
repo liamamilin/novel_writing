@@ -1,10 +1,10 @@
 from __future__ import annotations
+
 from pathlib import Path
 from uuid import uuid4
 
 from novel_runtime.models.character import CharacterState
 from novel_runtime.models.hook import Hook
-from novel_runtime.models.subplot import Subplot
 from novel_runtime.models.timeline import TimelineEvent
 from novel_runtime.storage.base import read_yaml, write_yaml
 

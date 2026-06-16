@@ -1,5 +1,4 @@
 from __future__ import annotations
-from pathlib import Path
 
 import yaml
 
@@ -7,8 +6,8 @@ from novel_runtime.agents.context_compiler import ContextCompilerAgent
 from novel_runtime.compiler.context_assembler import ContextAssembler
 from novel_runtime.compiler.state_health_checker import StateHealthChecker
 from novel_runtime.exceptions import StyleNotSetError
-from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.llm.prompt_loader import PromptLoader
+from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.services.project_service import ProjectService
 from novel_runtime.storage import strategy_storage
 from novel_runtime.storage.chapter_storage import save_chapter_file
@@ -31,7 +30,7 @@ class ContextService:
         if not project.default_style_id:
             raise StyleNotSetError("No style set. Run style analysis first.")
 
-        rc = self.assembler.assemble(project_id, chapter_number, chapter_goal, project.default_style_id)
+        self.assembler.assemble(project_id, chapter_number, chapter_goal, project.default_style_id)
 
         project_path = self.project_service.get_project_path(project_id)
         strategy = strategy_storage.load_strategy(project_path)

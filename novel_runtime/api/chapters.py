@@ -1,19 +1,19 @@
 from __future__ import annotations
+
 import json as json_mod
 from pathlib import Path
 
 from fastapi import APIRouter, Depends, Request
 from starlette.responses import StreamingResponse
 
-from novel_runtime.llm.provider import create_provider
 from novel_runtime.llm.prompt_loader import PromptLoader
+from novel_runtime.llm.provider import create_provider
 from novel_runtime.models.style import StyleAsset
 from novel_runtime.services.chapter_service import ChapterService
 from novel_runtime.services.context_service import ContextService
 from novel_runtime.services.project_service import ProjectService
 from novel_runtime.services.review_service import ReviewService
 from novel_runtime.storage import chapter_storage
-
 
 router = APIRouter(prefix="/api/projects/{project_id}/chapters", tags=["chapters"])
 
@@ -104,7 +104,6 @@ async def generate_draft_stream(
     project = project_svc.get_project(project_id)
 
     from novel_runtime.storage.chapter_storage import load_chapter_file
-    from novel_runtime.exceptions import InvalidStateTransitionError
 
     def event_stream():
         try:
@@ -124,7 +123,7 @@ async def generate_draft_stream(
             yield f"data: {json_mod.dumps({'error': str(e)})}\n\n"
             return
 
-        from novel_runtime.storage import style_storage, state_storage
+        from novel_runtime.storage import state_storage, style_storage
         try:
             style = style_storage.load_style_asset(project_path, project.default_style_id) if project.default_style_id else StyleAsset()
         except FileNotFoundError:
@@ -207,8 +206,9 @@ async def get_reviews(
     request: Request,
 ):
     settings = request.app.state.settings
-    from novel_runtime.services.project_service import ProjectService
     from pathlib import Path
+
+    from novel_runtime.services.project_service import ProjectService
     db = request.app.state.db
     project_svc = ProjectService(db, Path(settings.storage_base_path))
     project_path = project_svc.get_project_path(project_id)
@@ -225,8 +225,9 @@ async def get_content(
 ):
     """Get the current active content for a chapter: active draft, final, or empty."""
     settings = request.app.state.settings
-    from novel_runtime.services.project_service import ProjectService
     from pathlib import Path
+
+    from novel_runtime.services.project_service import ProjectService
 
     db = request.app.state.db
     project_svc = ProjectService(db, Path(settings.storage_base_path))
@@ -263,9 +264,10 @@ async def save_content(
 ):
     """Save user-edited content as a new draft version."""
     settings = request.app.state.settings
-    from novel_runtime.services.project_service import ProjectService
     from pathlib import Path
-    from novel_runtime.storage.chapter_storage import save_draft_version, mark_reviews_stale
+
+    from novel_runtime.services.project_service import ProjectService
+    from novel_runtime.storage.chapter_storage import mark_reviews_stale, save_draft_version
     from novel_runtime.storage.project_storage import ProjectStorage
 
     db = request.app.state.db
@@ -322,7 +324,6 @@ async def list_drafts(
     chapter_number: int,
     request: Request,
 ):
-    settings = request.app.state.settings
     _, _, _, project_svc, _ = get_services(request)
     project_path = project_svc.get_project_path(project_id)
     from novel_runtime.storage.chapter_storage import list_drafts as _list_drafts
@@ -357,12 +358,13 @@ async def promote_draft(
     request: Request,
 ):
     settings = request.app.state.settings
-    from novel_runtime.services.project_service import ProjectService
     from pathlib import Path
+
+    from novel_runtime.services.project_service import ProjectService
 
     db = request.app.state.db
     project_svc = ProjectService(db, Path(settings.storage_base_path))
-    project_path = project_svc.get_project_path(project_id)
+    project_svc.get_project_path(project_id)
     project = project_svc.get_project(project_id)
     chapter = project_svc.get_chapter(project_id, chapter_number)
     chapter.active_draft_id = draft_id
@@ -378,10 +380,11 @@ async def multi_reader_review(
     body: dict,
     request: Request,
 ):
+    from pathlib import Path
+
     from novel_runtime.agents.reader_personas import BUILTIN_PERSONAS, PERSONA_MAP
     from novel_runtime.llm.provider import create_provider
     from novel_runtime.services.project_service import ProjectService
-    from pathlib import Path
 
     settings = request.app.state.settings
     db = request.app.state.db

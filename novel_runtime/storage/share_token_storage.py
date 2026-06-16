@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 import json
 from pathlib import Path
 
@@ -21,7 +22,7 @@ class ShareTokenStorage:
         path = self._tokens_path()
         if not path.exists():
             return None
-        with open(path, "r", encoding="utf-8") as f:
+        with open(path, encoding="utf-8") as f:
             for line in f:
                 if line.strip():
                     entry = json.loads(line)

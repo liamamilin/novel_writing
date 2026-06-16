@@ -1,5 +1,4 @@
-from prometheus_client import Counter, Gauge, Histogram, generate_latest, REGISTRY
-from prometheus_client import CONTENT_TYPE_LATEST
+from prometheus_client import CONTENT_TYPE_LATEST, REGISTRY, Counter, Gauge, Histogram, generate_latest
 from starlette.responses import Response
 
 llm_calls_total = Counter(

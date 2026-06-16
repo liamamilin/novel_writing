@@ -1,12 +1,11 @@
 from __future__ import annotations
+
 from pathlib import Path
 
-from fastapi import APIRouter, Depends, Query
-from fastapi import Request
+from fastapi import APIRouter, Depends, Query, Request
 
 from novel_runtime.models.project import Project, ProjectCreate, ProjectUpdate
 from novel_runtime.services.project_service import ProjectService
-
 
 router = APIRouter(prefix="/api/projects", tags=["projects"])
 

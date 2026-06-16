@@ -1,25 +1,24 @@
 from __future__ import annotations
+
 from pathlib import Path
 
 import typer
 from rich.console import Console
-from rich.table import Table
 
+from novel_runtime.compiler.state_health_checker import StateHealthChecker
 from novel_runtime.config import Settings
 from novel_runtime.db.database import Database
-from novel_runtime.llm.provider import create_provider
 from novel_runtime.llm.prompt_loader import PromptLoader
+from novel_runtime.llm.provider import create_provider
 from novel_runtime.models.project import ProjectCreate
-from novel_runtime.services.project_service import ProjectService
-from novel_runtime.services.style_service import StyleService
 from novel_runtime.services.bible_service import BibleService
-from novel_runtime.services.context_service import ContextService
 from novel_runtime.services.chapter_service import ChapterService
+from novel_runtime.services.context_service import ContextService
+from novel_runtime.services.project_service import ProjectService
 from novel_runtime.services.review_service import ReviewService
 from novel_runtime.services.state_service import StateService
-from novel_runtime.compiler.state_health_checker import StateHealthChecker
-from novel_runtime.storage import strategy_storage, state_storage, subplot_storage
-
+from novel_runtime.services.style_service import StyleService
+from novel_runtime.storage import state_storage, strategy_storage, subplot_storage
 
 app = typer.Typer(name="novel", help="Novel Writing Runtime CLI")
 style_app = typer.Typer()
@@ -276,7 +275,7 @@ def cache_stats():
     cache_path = settings.llm_cache_path or str(Path(settings.storage_base_path) / "llm_cache.db")
     cache = LLMCache(db_path=cache_path, ttl=settings.llm_cache_ttl)
     s = cache.stats()
-    console.print(f"📊 LLM 缓存统计")
+    console.print("📊 LLM 缓存统计")
     console.print(f"  总条目: {s['total_entries']}")
     console.print(f"  总命中: {s['total_hits']}")
 

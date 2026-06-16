@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from pathlib import Path
 from unittest.mock import MagicMock
 
@@ -143,7 +144,6 @@ class TestNarrativePolisherAgent:
 
     def test_polish_returns_text(self):
         from novel_runtime.agents.narrative_polisher import NarrativePolisherAgent
-        from unittest.mock import MagicMock
         mock_provider = MagicMock()
         mock_provider.generate_with_usage.return_value = ("润色结果", {"prompt_tokens": 10, "completion_tokens": 5, "total_tokens": 15})
         agent = NarrativePolisherAgent(provider=mock_provider, prompt_loader=MagicMock())

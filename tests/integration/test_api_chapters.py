@@ -9,9 +9,9 @@ from novel_runtime.config import Settings
 from novel_runtime.db.database import Database
 from novel_runtime.models.project import ProjectCreate
 from novel_runtime.services.project_service import ProjectService
+from novel_runtime.storage import state_storage
 from novel_runtime.storage.project_storage import ProjectStorage
 from novel_runtime.storage.snapshot_storage import SnapshotManager
-from novel_runtime.storage import state_storage
 
 
 @pytest.fixture

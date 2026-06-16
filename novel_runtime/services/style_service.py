@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from uuid import uuid4
 
 from fastapi import BackgroundTasks
@@ -6,9 +7,9 @@ from fastapi import BackgroundTasks
 from novel_runtime.agents.style_analyst import StyleAnalystAgent
 from novel_runtime.config import Settings
 from novel_runtime.db.database import Database
-from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.llm.prompt_loader import PromptLoader
-from novel_runtime.models.style import StyleAsset, CharacterVoice
+from novel_runtime.llm.provider import LLMProvider
+from novel_runtime.models.style import CharacterVoice, StyleAsset
 from novel_runtime.services.project_service import ProjectService
 from novel_runtime.services.task_service import TaskService
 from novel_runtime.storage import style_storage
@@ -36,7 +37,7 @@ class StyleService:
         )
 
     def upload_sample(self, project_id: str, sample_name: str, text: str) -> str:
-        project = self.project_service.get_project(project_id)
+        self.project_service.get_project(project_id)
         sample_id = f"sample_{uuid4().hex[:6]}"
         project_path = self.project_service.get_project_path(project_id)
         style_storage.save_source_text(project_path, sample_id, text)
@@ -45,7 +46,7 @@ class StyleService:
     def analyze_style_sync(
         self, project_id: str, sample_ids: list[str], style_name: str, run_adversarial: bool = True
     ) -> StyleAsset:
-        project = self.project_service.get_project(project_id)
+        self.project_service.get_project(project_id)
         project_path = self.project_service.get_project_path(project_id)
 
         samples = []

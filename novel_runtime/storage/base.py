@@ -1,8 +1,8 @@
 from __future__ import annotations
+
 from pathlib import Path
 
 import yaml
-
 from pydantic import BaseModel
 
 
@@ -10,7 +10,7 @@ def read_yaml(file_path: Path) -> dict:
     if not file_path.exists():
         raise FileNotFoundError(f"YAML file not found: {file_path}")
     try:
-        with open(file_path, "r", encoding="utf-8") as f:
+        with open(file_path, encoding="utf-8") as f:
             return yaml.safe_load(f) or {}
     except yaml.YAMLError as e:
         raise ValueError(f"Invalid YAML in {file_path}: {e}")
@@ -28,7 +28,7 @@ def write_yaml(file_path: Path, data: dict, overwrite: bool = False) -> Path:
 def read_md(file_path: Path) -> str:
     if not file_path.exists():
         raise FileNotFoundError(f"Markdown file not found: {file_path}")
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:
         return f.read()
 
 

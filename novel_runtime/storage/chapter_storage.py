@@ -1,9 +1,10 @@
 from __future__ import annotations
+
 import os
 import stat
 from pathlib import Path
 
-from novel_runtime.storage.base import read_md, write_md, read_yaml, write_yaml
+from novel_runtime.storage.base import read_md, read_yaml, write_md, write_yaml
 
 MD_EXT = {"md"}
 YAML_EXT = {"yaml"}

@@ -1,16 +1,18 @@
 from __future__ import annotations
+
+import shutil
+import tempfile
 from pathlib import Path
-import tempfile, shutil
 
 import pytest
 
 from novel_runtime.compiler.state_diff import StateDiffer
-from novel_runtime.storage.snapshot_storage import SnapshotManager
-from novel_runtime.storage import state_storage, subplot_storage
+from novel_runtime.exceptions import SnapshotNotFoundError
 from novel_runtime.models.character import CharacterState
 from novel_runtime.models.hook import Hook
 from novel_runtime.models.subplot import Subplot
-from novel_runtime.exceptions import SnapshotNotFoundError
+from novel_runtime.storage import state_storage, subplot_storage
+from novel_runtime.storage.snapshot_storage import SnapshotManager
 
 
 class TestStateDiffer:
@@ -75,8 +77,8 @@ class TestSnapshotManager:
 
     def test_delete_snapshot(self, tmp_path):
         self.manager.create_snapshot(tmp_path, 1)
-        assert self.manager.delete_snapshot(tmp_path, 1) == True
-        assert self.manager.delete_snapshot(tmp_path, 1) == False
+        assert self.manager.delete_snapshot(tmp_path, 1)
+        assert not self.manager.delete_snapshot(tmp_path, 1)
 
     def test_restore_nonexistent(self, tmp_path):
         with pytest.raises(SnapshotNotFoundError):

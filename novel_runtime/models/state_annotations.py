@@ -1,4 +1,4 @@
-from typing import Literal, Optional
+from typing import Literal
 
 from pydantic import BaseModel
 
@@ -22,22 +22,22 @@ class StateAnnotation(BaseModel):
     trigger: str = ""
     narrative_impact: str = ""
 
-    hook_id: Optional[str] = None
-    hook_type: Optional[str] = None
-    reader_patience: Optional[int] = None
-    subplot_id: Optional[str] = None
-    advancement: Optional[str] = None
-    next_stage: Optional[str] = None
-    arc_progression: Optional[str] = None
+    hook_id: str | None = None
+    hook_type: str | None = None
+    reader_patience: int | None = None
+    subplot_id: str | None = None
+    advancement: str | None = None
+    next_stage: str | None = None
+    arc_progression: str | None = None
 
 
 class SummaryAnnotation(BaseModel):
     type: str = "new_world_info"
-    hook_id: Optional[str] = None
-    info: Optional[str] = None
-    from_character: Optional[str] = None
-    to_character: Optional[str] = None
-    change: Optional[str] = None
+    hook_id: str | None = None
+    info: str | None = None
+    from_character: str | None = None
+    to_character: str | None = None
+    change: str | None = None
 
 
 class StateAnnotationsFile(BaseModel):

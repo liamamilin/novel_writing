@@ -1,4 +1,5 @@
 from __future__ import annotations
+
 from datetime import datetime
 
 from novel_runtime.db.database import Database

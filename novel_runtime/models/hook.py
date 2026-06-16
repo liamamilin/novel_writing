@@ -2,7 +2,6 @@ from typing import Literal
 
 from pydantic import BaseModel
 
-
 HOOK_TYPES = Literal["mystery", "tension", "promise", "emotional", "power"]
 HOOK_URGENCIES = Literal["stable", "rising", "critical"]
 
