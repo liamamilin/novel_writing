@@ -10,9 +10,7 @@ from novel_runtime.compiler.state_health_checker import StateHealthChecker
 from novel_runtime.exceptions import ChapterNotFoundError, InvalidStateTransitionError
 from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.llm.prompt_loader import PromptLoader
-from novel_runtime.models.character import CharacterState
 from novel_runtime.models.hook import Hook
-from novel_runtime.models.subplot import Subplot
 from novel_runtime.services.bible_update_service import BibleUpdateService
 from novel_runtime.services.project_service import ProjectService
 from novel_runtime.services.hook_service import HookService

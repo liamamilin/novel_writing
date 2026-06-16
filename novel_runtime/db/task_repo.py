@@ -1,6 +1,6 @@
 from __future__ import annotations
 import json
-from datetime import datetime
+from datetime import datetime, timezone
 
 from novel_runtime.db.database import Database
 from novel_runtime.models.task import Task
@@ -54,7 +54,7 @@ class TaskRepo:
 
     def update_status(self, task_id: str, status: str, output_data: dict | None = None, error: str | None = None) -> Task:
         conn = self.db.get_connection()
-        now = datetime.utcnow().isoformat()
+        now = datetime.now(timezone.utc).isoformat()
         if output_data is not None:
             conn.execute(
                 "UPDATE tasks SET status=?, output_data=?, updated_at=? WHERE task_id=?",

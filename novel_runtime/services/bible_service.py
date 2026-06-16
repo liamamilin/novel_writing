@@ -8,7 +8,6 @@ from novel_runtime.agents.story_architect import StoryArchitectAgent
 from novel_runtime.db.database import Database
 from novel_runtime.llm.provider import LLMProvider
 from novel_runtime.llm.prompt_loader import PromptLoader
-from novel_runtime.models.bible import BibleUpdateItem, BibleUpdateProposal
 from novel_runtime.models.project import ProjectUpdate
 from novel_runtime.models.strategy import WritingStrategy
 from novel_runtime.models.subplot import Subplot

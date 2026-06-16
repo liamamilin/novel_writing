@@ -2,16 +2,16 @@ from __future__ import annotations
 import json as json_mod
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, Depends, Request
+from fastapi import APIRouter, Depends, Request
 from starlette.responses import StreamingResponse
 
 from novel_runtime.llm.provider import create_provider
 from novel_runtime.llm.prompt_loader import PromptLoader
+from novel_runtime.models.style import StyleAsset
 from novel_runtime.services.chapter_service import ChapterService
 from novel_runtime.services.context_service import ContextService
 from novel_runtime.services.project_service import ProjectService
 from novel_runtime.services.review_service import ReviewService
-from novel_runtime.storage.project_storage import ProjectStorage
 
 
 router = APIRouter(prefix="/api/projects/{project_id}/chapters", tags=["chapters"])
@@ -142,7 +142,6 @@ async def generate_draft_stream(
         unique_voices = {v.voice_id: v for v in all_voices}.values() if all_voices else []
 
         import yaml
-        from novel_runtime.models.style import StyleAsset
 
         style_params = yaml.dump(style.model_dump(), allow_unicode=True, default_flow_style=False)
         voice_params = "\n".join(

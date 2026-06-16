@@ -44,7 +44,7 @@ class TestContextAssembler:
         assert "第三人称" in rc.style_and_voices_content
         assert "主角首次登场" == rc.chapter_goal_content
         assert rc.total_tokens > 0
-        print("✓ assemble basic")
+        pass
 
     def test_assemble_with_locale(self, env):
         project, project_path, _ = env
@@ -62,7 +62,7 @@ class TestContextAssembler:
         rc = assembler.assemble(project.project_id, 1, "拍卖会", "style_001")
         assert "云海市" in rc.current_state_content
         assert "林云" in rc.character_state_content
-        print("✓ assemble with state")
+        pass
 
     def test_assemble_no_style(self, env):
         project, project_path, _ = env
@@ -72,7 +72,7 @@ class TestContextAssembler:
             assembler.assemble(project.project_id, 1, "test", "nonexistent")
             assert False, "Expected StyleNotSetError"
         except StyleNotSetError:
-            print("✓ assemble no style -> StyleNotSetError")
+            pass
 
     def test_assemble_project_not_found(self, tmp_path):
         assembler = ContextAssembler(tmp_path)
@@ -81,7 +81,7 @@ class TestContextAssembler:
             assembler.assemble("nonexistent", 1, "test", "style_001")
             assert False, "Expected ProjectNotFoundError"
         except ProjectNotFoundError:
-            print("✓ assemble project not found -> ProjectNotFoundError")
+            pass
 
     def test_token_budget_within(self):
         mgr = TokenBudgetManager(total_budget=10000)
@@ -89,7 +89,7 @@ class TestContextAssembler:
         result = mgr.allocate(sections)
         assert result["a"] == "hello"
         assert result["b"] == "world"
-        print("✓ token budget within range")
+        pass
 
     def test_token_budget_over(self):
         mgr = TokenBudgetManager(
@@ -101,7 +101,7 @@ class TestContextAssembler:
         result = mgr.allocate(sections)
         assert result["a"] == sections["a"]
         assert len(result["b"]) < len(sections["b"])
-        print("✓ token budget over -> low priority truncated")
+        pass
 
     def test_summarize_section(self):
         mgr = TokenBudgetManager()
@@ -113,7 +113,7 @@ class TestContextAssembler:
         assert "第四段" in reduced
         minimal = mgr.summarize_section(text, "minimal")
         assert len(minimal) <= len(text)
-        print("✓ summarize section")
+        pass
 
     def test_assemble_to_markdown(self, env):
         project, project_path, _ = env
@@ -122,4 +122,4 @@ class TestContextAssembler:
         assert "# Context Pack" in md
         assert "项目ID:" in md
         assert "Token 统计:" in md
-        print("✓ assemble to markdown")
+        pass

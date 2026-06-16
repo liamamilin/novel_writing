@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-import re
-
 import yaml
 
 from novel_runtime.agents.base import BaseAgent, AgentResult
