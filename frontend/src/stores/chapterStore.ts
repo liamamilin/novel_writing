@@ -9,6 +9,7 @@ interface ChapterStore {
   error: string | null;
   setCurrentChapter: (ch: Chapter | null) => void;
   loadChapters: (projectId: string) => Promise<void>;
+  clearChapters: () => void;
 }
 
 export const useChapterStore = create<ChapterStore>((set) => ({
@@ -26,4 +27,5 @@ export const useChapterStore = create<ChapterStore>((set) => ({
       set({ error: (e as Error).message, loading: false });
     }
   },
+  clearChapters: () => set({ chapters: [], currentChapter: null }),
 }));

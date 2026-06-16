@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, useParams } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ThreeColumnLayout } from './components/layout/ThreeColumnLayout';
 import { LeftPanel } from './components/layout/LeftPanel';
@@ -10,20 +10,32 @@ import { ProjectList } from './pages/ProjectList';
 import { ProjectCreate } from './pages/ProjectCreate';
 import { useUIStore } from './stores/uiStore';
 import { useProjectStore } from './stores/projectStore';
-import { useState } from 'react';
+import { useChapterStore } from './stores/chapterStore';
+import { useState, useEffect } from 'react';
 
 const queryClient = new QueryClient();
 
 function MainLayout() {
+  const { id } = useParams<{ id: string }>();
   const { notification, clearNotification } = useUIStore();
   const currentProject = useProjectStore((s) => s.currentProject);
+  const selectProject = useProjectStore((s) => s.selectProject);
   const [activityOpen, setActivityOpen] = useState(false);
+
+  const clearChapters = useChapterStore((s) => s.clearChapters);
+
+  useEffect(() => {
+    if (id && (!currentProject || currentProject.project_id !== id)) {
+      clearChapters();
+      selectProject(id);
+    }
+  }, [id, currentProject, selectProject, clearChapters]);
 
   return (
     <div>
       {notification && (
         <div
-          className={`fixed top-4 right-4 z-50 px-4 py-2 rounded shadow-lg text-white cursor-pointer ${
+          className={`fixed top-20 right-4 z-50 px-4 py-2 rounded shadow-lg text-white cursor-pointer max-w-sm text-sm ${
             notification.type === 'error' ? 'bg-red-500' :
             notification.type === 'success' ? 'bg-green-500' : 'bg-blue-500'
           }`}

@@ -3,6 +3,7 @@ import { useProjectStore } from '../../stores/projectStore';
 import { useChapterStore } from '../../stores/chapterStore';
 import { useUIStore } from '../../stores/uiStore';
 import { chaptersApi } from '../../api/chapters';
+import { bibleApi } from '../../api/bible';
 
 const statusConfig: Record<string, { bg: string; text: string; label: string }> = {
   planned: { bg: 'bg-gray-200', text: 'text-gray-600', label: '\u89C4\u5212' },
@@ -41,9 +42,17 @@ export function ChapterList() {
       if (!currentProject) return;
       setCreating(true);
       try {
-        await chaptersApi.plan(currentProject.project_id, 1, '\u5F00\u573A\u7AE0\u8282');
+        // verify Bible exists before planning
+        try {
+          await bibleApi.get(currentProject.project_id);
+        } catch {
+          notify('请先生成 Bible（右侧面板 → Bible 生成），再创建章节', 'error');
+          setCreating(false);
+          return;
+        }
+        await chaptersApi.plan(currentProject.project_id, 1, '开场章节');
         await loadChapters(currentProject.project_id);
-        notify('\u7B2C 1 \u7AE0\u5DF2\u521B\u5EFA', 'success');
+        notify('第 1 章已创建', 'success');
       } catch (e) {
         notify((e as Error).message, 'error');
       } finally {

@@ -39,7 +39,7 @@ export function ProjectList() {
           disabled={demoLoading}
           className="text-sm text-gray-500 hover:text-blue-600 border border-gray-300 rounded px-3 py-1.5 disabled:opacity-50"
         >
-          {demoLoading ? '创建中...' : '加载示例项目'}
+          {demoLoading ? '创建中...' : '快速创建（空白）'}
         </button>
       </div>
       <Link

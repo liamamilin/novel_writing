@@ -4,6 +4,8 @@ import { useChapterStore } from '../../stores/chapterStore';
 const MDEditor = lazy(() => import('@uiw/react-md-editor'));
 import { useProjectStore } from '../../stores/projectStore';
 import { useStreamStore } from '../../stores/streamStore';
+import { useUIStore } from '../../stores/uiStore';
+import { chaptersApi } from '../../api/chapters';
 import { DraftSelector } from './DraftSelector';
 import { DraftDiff } from './DraftDiff';
 
@@ -21,8 +23,11 @@ export function ChapterEditor() {
   const currentProject = useProjectStore((s) => s.currentProject);
   const currentChapter = useChapterStore((s) => s.currentChapter);
   const loadChapters = useChapterStore((s) => s.loadChapters);
+  const notify = useUIStore((s) => s.notify);
   const [activeTab, setActiveTab] = useState<'plan' | 'draft' | 'final'>('draft');
   const [content, setContent] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [contentLoading, setContentLoading] = useState(false);
   const isStreaming = useStreamStore((s) => s.isStreaming);
   const streamedContent = useStreamStore((s) => s.streamedContent);
   const [showDiff, setShowDiff] = useState(false);
@@ -38,6 +43,65 @@ export function ChapterEditor() {
       else setActiveTab('draft');
     }
   }, [currentChapter]);
+
+  // B4: auto-load content when chapter changes
+  useEffect(() => {
+    if (!currentProject || !currentChapter) return;
+    setContent('');
+    setShowDiff(false);
+    setSaving(false);
+    // if streaming is in progress, don't clobber streamedContent
+    if (isStreaming) return;
+
+    // if chapter is planned, nothing to load
+    if (currentChapter.status === 'planned') return;
+
+    setContentLoading(true);
+    chaptersApi.getContent(currentProject.project_id, currentChapter.chapter_number)
+      .then((res) => {
+        if (res.content) {
+          setContent(res.content);
+        }
+      })
+      .catch(() => {})
+      .finally(() => setContentLoading(false));
+  }, [currentProject?.project_id, currentChapter?.chapter_id, currentChapter?.chapter_number, currentChapter?.status]);
+
+  const isReadOnly = currentChapter
+    ? (currentChapter.status === 'approved' || currentChapter.status === 'locked')
+    : true;
+  const currentStatusIdx = currentChapter
+    ? STATUS_FLOW.indexOf(currentChapter.status as typeof STATUS_FLOW[number])
+    : -1;
+
+  // B2: save content
+  const handleSave = useCallback(async () => {
+    if (!currentProject || !currentChapter || isReadOnly || isStreaming) return;
+    setSaving(true);
+    try {
+      const res = await chaptersApi.saveContent(currentProject.project_id, currentChapter.chapter_number, content);
+      notify('已保存为草稿 v' + res.draft_id, 'success');
+      if (res.status !== currentChapter.status && currentProject) {
+        await loadChapters(currentProject.project_id);
+      }
+    } catch (e) {
+      notify((e as Error).message, 'error');
+    } finally {
+      setSaving(false);
+    }
+  }, [currentProject, currentChapter, content, isReadOnly, isStreaming, notify, loadChapters]);
+
+  // Ctrl+S to save
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, [handleSave]);
 
   const handleDraftSelect = useCallback((_draftId: number, _content: string) => {
     if (!showDiff) {
@@ -57,7 +121,15 @@ export function ChapterEditor() {
     if (currentProject) {
       loadChapters(currentProject.project_id);
     }
-  }, [currentProject, loadChapters]);
+    // reload content after promote
+    if (currentProject && currentChapter) {
+      chaptersApi.getContent(currentProject.project_id, currentChapter.chapter_number)
+        .then((res) => {
+          if (res.content) setContent(res.content);
+        })
+        .catch(() => {});
+    }
+  }, [currentProject, currentChapter, loadChapters]);
 
   if (!currentProject || !currentChapter) {
     return (
@@ -66,9 +138,6 @@ export function ChapterEditor() {
       </div>
     );
   }
-
-  const isReadOnly = currentChapter.status === 'approved' || currentChapter.status === 'locked';
-  const currentStatusIdx = STATUS_FLOW.indexOf(currentChapter.status as typeof STATUS_FLOW[number]);
 
   return (
     <div className="h-full flex flex-col">
@@ -79,6 +148,9 @@ export function ChapterEditor() {
           <span className="ml-2 text-sm font-normal text-gray-500">
             ({statusLabel[currentChapter.status] || currentChapter.status})
           </span>
+          <span className="ml-2 text-xs text-gray-400 font-normal">
+            提示: 按 Ctrl+S 保存草稿
+          </span>
         </h2>
       </div>
 
@@ -87,14 +159,13 @@ export function ChapterEditor() {
           const active = i <= currentStatusIdx;
           const isCurrent = s === currentChapter.status;
           return (
-            <div key={s} className="flex items-center">
+            <div key={s} className="flex items-center" title={statusLabel[s] + (i > 0 ? ` → 下一步: ${statusLabel[STATUS_FLOW[i-1]]}` : '')}>
               <div
                 className={`w-3 h-3 rounded-full ${
                   isCurrent ? 'bg-blue-500 ring-2 ring-blue-200' :
                   active ? 'bg-blue-400' :
                   'bg-gray-300'
                 }`}
-                title={statusLabel[s]}
               />
               {i < STATUS_FLOW.length - 1 && (
                 <div className={`w-6 h-0.5 ${i < currentStatusIdx ? 'bg-blue-400' : 'bg-gray-300'}`} />
@@ -127,6 +198,15 @@ export function ChapterEditor() {
               {tab === 'plan' ? '规划' : tab === 'draft' ? '草稿' : '终稿'}
             </button>
           ))}
+          {!isReadOnly && !isStreaming && (
+            <button
+              onClick={handleSave}
+              disabled={saving || contentLoading}
+              className="px-3 py-1 text-sm rounded bg-green-600 text-white hover:bg-green-700 disabled:opacity-50"
+            >
+              {saving ? '保存中...' : '保存'}
+            </button>
+          )}
         </div>
         <DraftSelector
           projectId={currentProject.project_id}
@@ -137,6 +217,12 @@ export function ChapterEditor() {
       </div>
 
       {isStreaming && <StreamingProgress chars={streamedContent.length} />}
+
+      {contentLoading && !isStreaming && (
+        <div className="flex items-center justify-center h-full text-gray-400 text-sm">
+          加载内容中...
+        </div>
+      )}
 
       {showDiff ? (
         <div className="flex-1 overflow-auto">

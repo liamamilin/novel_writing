@@ -46,4 +46,10 @@ export const chaptersApi = {
     api.post<{ results: Record<string, unknown>[] }>(`/projects/${pid}/chapters/${ch}/review/multi-reader`, {
       persona_ids: personaIds,
     }),
+  getContent: (pid: string, ch: number) =>
+    api.get<{ content: string; source: string; draft_id?: number }>(`/projects/${pid}/chapters/${ch}/content`),
+  saveContent: (pid: string, ch: number, content: string) =>
+    api.post<{ draft_id: number; draft_count: number; status: string }>(`/projects/${pid}/chapters/${ch}/content`, {
+      content,
+    }),
 };

@@ -2,6 +2,7 @@ import { create } from 'zustand';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { getToken } from '../api/client';
 import { useUIStore } from './uiStore';
+import { useChapterStore } from './chapterStore';
 
 interface StreamStore {
   isStreaming: boolean;
@@ -46,6 +47,8 @@ export const useStreamStore = create<StreamStore>((set) => {
               }
               if (data.done) {
                 set({ isStreaming: false, streamedContent: data.full || full });
+                // B3: auto-refresh chapter status after stream completes
+                useChapterStore.getState().loadChapters(projectId);
               }
             } catch { /* skip */ }
           },

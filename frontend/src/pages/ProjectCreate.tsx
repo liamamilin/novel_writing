@@ -23,9 +23,9 @@ export function ProjectCreate() {
   const [idea, setIdea] = useState('');
   const [styleSample, setStyleSample] = useState('');
   const [styleId, setStyleId] = useState<string | null>(null);
-  const [directions, setDirections] = useState<any[]>([]);
+  const [directions, setDirections] = useState<{ direction_id: string; title: string; description?: string; summary?: string }[]>([]);
   const [selectedDirection, setSelectedDirection] = useState<string | null>(null);
-  const [characters, setCharacters] = useState<any[]>([]);
+  const [characters, setCharacters] = useState<{ name: string; description?: string; role?: string }[]>([]);
 
   const handleCreateProject = async () => {
     if (!name || !genre) {
@@ -54,9 +54,10 @@ export function ProjectCreate() {
     try {
       const uploadResult = await stylesApi.uploadSample(projectId, styleSample);
       const result = await stylesApi.analyze(projectId, [uploadResult.sample_id], 'default-style');
-      const styleId = 'style_id' in result ? (result as any).style_id : 'default-style';
-      setStyleId(styleId);
+      const sid = result && typeof result === 'object' && 'style_id' in result ? String((result as any).style_id) : 'default-style';
+      setStyleId(sid);
       notify('\u6587\u98CE\u5206\u6790\u5B8C\u6210', 'success');
+      setStep(3);
     } catch (e) {
       notify((e as Error).message, 'error');
     } finally {
@@ -69,7 +70,7 @@ export function ProjectCreate() {
     setLoading(true);
     try {
       const result = await bibleApi.direction(projectId, idea, genre);
-      setDirections(result.variants || []);
+      setDirections((result.variants || []) as any);
     } catch (e) {
       notify((e as Error).message, 'error');
     } finally {
@@ -85,7 +86,7 @@ export function ProjectCreate() {
     setLoading(true);
     try {
       const result = await bibleApi.generateCharacters(projectId, selectedDirection);
-      setCharacters(result.characters || []);
+      setCharacters((result.characters || []) as any);
     } catch (e) {
       notify((e as Error).message, 'error');
     } finally {

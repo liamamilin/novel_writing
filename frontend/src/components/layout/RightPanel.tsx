@@ -43,11 +43,12 @@ export function RightPanel() {
     setLoading(key);
     try {
       const result = await fn();
-      notify(`${key} \u5B8C\u6210`, 'success');
+      if (key !== 'check') notify(`${key} \u5B8C\u6210`, 'success');
       if (pid) await loadChapters(pid);
       return result;
     } catch (e) {
-      notify((e as Error).message, 'error');
+      const msg = (e as Error).message;
+      if (msg !== 'cancelled') notify(msg, 'error');
     } finally {
       setLoading(null);
     }
@@ -86,7 +87,11 @@ export function RightPanel() {
     {
       label: '\u786E\u8BA4\u7AE0\u8282',
       action: 'approve',
-      apiCall: () => chaptersApi.approve(pid!, ch!, ''),
+      apiCall: async () => {
+        const ok = window.confirm('确认将本章标记为"已确认"？之后将不可编辑。');
+        if (!ok) throw new Error('cancelled');
+        return chaptersApi.approve(pid!, ch!, '');
+      },
       requireStatus: ['reviewed'],
     },
   ] : [];
@@ -102,11 +107,29 @@ export function RightPanel() {
       <div>
         <h3 className="font-bold text-sm text-gray-500 uppercase mb-1">{"\uD83D\uDCC1"} \u9879\u76EE\u7BA1\u7406</h3>
         <button
-          onClick={() => runAction('health', () => api.get(`/health`))}
-          disabled={!pid || !!loading}
+          onClick={async () => {
+            if (!pid) { notify('请先选择项目', 'error'); return; }
+            setLoading('check');
+            try {
+              const res = await api.get<any>('/health');
+              const llm = res.checks?.llm;
+              const parts = [
+                `数据库: ${res.checks?.database?.status || '?'}`,
+                `存储: ${res.checks?.storage?.status || '?'}`,
+                `LLM: ${llm?.status || '?'} (${llm?.detail?.model || '?'})`,
+              ];
+              if (llm?.detail?.latency_ms) parts.push(`延迟: ${llm.detail.latency_ms}ms`);
+              notify('系统状态: ' + parts.join(' | '), res.status === 'ok' ? 'success' : 'error');
+            } catch (e) {
+              notify('健康检查失败: ' + (e as Error).message, 'error');
+            } finally {
+              setLoading(null);
+            }
+          }}
+          disabled={!!loading}
           className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 rounded border-b last:border-b-0 disabled:opacity-50"
         >
-          \u5065\u5EB7\u68C0\u67E5
+          {loading === 'check' ? '检查中...' : `\u{1F3A5} 系统状态检查`}
         </button>
         <button
           onClick={() => setShowExport(true)}
@@ -153,7 +176,7 @@ export function RightPanel() {
             <button
               onClick={() => {
                 if (isStreaming) {
-                  if (window.confirm('确定要停止流式生成吗？已生成的内容不会丢失。')) {
+                  if (window.confirm('确定要停止流式生成吗？未完成部分不会被保存。')) {
                     cancelStream();
                   }
                 } else {

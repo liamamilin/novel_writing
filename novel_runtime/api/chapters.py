@@ -162,7 +162,19 @@ async def generate_draft_stream(
             for chunk in provider.generate_stream(write_prompt):
                 full_text += chunk
                 yield f"data: {json_mod.dumps({'token': chunk})}\n\n"
-            yield f"data: {json_mod.dumps({'done': True, 'full': full_text})}\n\n"
+
+            # auto-save draft on successful completion
+            from novel_runtime.storage.chapter_storage import save_draft_version
+            from novel_runtime.storage.project_storage import ProjectStorage
+            chapter.draft_count += 1
+            current_draft_id = chapter.draft_count
+            save_draft_version(project_path, chapter_number, current_draft_id, full_text)
+            chapter.active_draft_id = current_draft_id
+            chapter.draft_path = str(project_path / "chapters" / f"chapter_{chapter_number:03d}" / "drafts" / f"draft_v{current_draft_id}.md")
+            chapter.status = "drafted"
+            ProjectStorage(Path(settings.storage_base_path)).save_chapter(project, chapter)
+
+            yield f"data: {json_mod.dumps({'done': True, 'full': full_text, 'draft_id': current_draft_id})}\n\n"
         except Exception as e:
             yield f"data: {json_mod.dumps({'error': str(e), 'partial': full_text})}\n\n"
 
@@ -191,6 +203,90 @@ async def review_chapter(
         chapter_number,
         body.get("review_types", ["continuity", "quality"]),
     )
+
+
+@router.get("/{chapter_number}/content")
+async def get_content(
+    project_id: str,
+    chapter_number: int,
+    request: Request,
+):
+    """Get the current active content for a chapter: active draft, final, or empty."""
+    settings = request.app.state.settings
+    from novel_runtime.services.project_service import ProjectService
+    from novel_runtime.db.database import Database
+    from pathlib import Path
+
+    db = request.app.state.db
+    project_svc = ProjectService(db, Path(settings.storage_base_path))
+    project_path = project_svc.get_project_path(project_id)
+    chapter = project_svc.get_chapter(project_id, chapter_number)
+
+    # approved/locked → return final.md
+    if chapter.status in ("approved", "locked"):
+        from novel_runtime.storage.chapter_storage import load_chapter_file
+        try:
+            content = load_chapter_file(project_path, chapter_number, "final")
+            return {"content": content, "source": "final"}
+        except FileNotFoundError:
+            return {"content": "", "source": "final"}
+
+    # has active draft → return it
+    if chapter.active_draft_id > 0:
+        from novel_runtime.storage.chapter_storage import load_draft_version
+        try:
+            content = load_draft_version(project_path, chapter_number, chapter.active_draft_id)
+            return {"content": content, "source": "draft", "draft_id": chapter.active_draft_id}
+        except FileNotFoundError:
+            pass
+
+    # try draft.md as fallback
+    from novel_runtime.storage.chapter_storage import load_chapter_file
+    try:
+        content = load_chapter_file(project_path, chapter_number, "draft")
+        return {"content": content, "source": "draft_file"}
+    except FileNotFoundError:
+        return {"content": "", "source": "none"}
+
+
+@router.post("/{chapter_number}/content")
+async def save_content(
+    project_id: str,
+    chapter_number: int,
+    body: dict,
+    request: Request,
+):
+    """Save user-edited content as a new draft version."""
+    settings = request.app.state.settings
+    from novel_runtime.services.project_service import ProjectService
+    from novel_runtime.db.database import Database
+    from pathlib import Path
+    from novel_runtime.storage.chapter_storage import save_draft_version
+    from novel_runtime.storage.project_storage import ProjectStorage
+
+    db = request.app.state.db
+    content = body.get("content", "")
+    project_svc = ProjectService(db, Path(settings.storage_base_path))
+    project_path = project_svc.get_project_path(project_id)
+    project = project_svc.get_project(project_id)
+    chapter = project_svc.get_chapter(project_id, chapter_number)
+
+    if chapter.status in ("approved", "locked"):
+        from fastapi import HTTPException
+        raise HTTPException(400, "Cannot edit a locked/approved chapter")
+
+    chapter.draft_count += 1
+    current_draft_id = chapter.draft_count
+    save_draft_version(project_path, chapter_number, current_draft_id, content)
+    chapter.active_draft_id = current_draft_id
+    chapter.draft_path = str(project_path / "chapters" / f"chapter_{chapter_number:03d}" / "drafts" / f"draft_v{current_draft_id}.md")
+
+    if chapter.status == "planned":
+        chapter.status = "drafted"
+
+    ProjectStorage(Path(settings.storage_base_path)).save_chapter(project, chapter)
+
+    return {"draft_id": current_draft_id, "draft_count": chapter.draft_count, "status": chapter.status}
 
 
 @router.get("/{chapter_number}/drafts")
