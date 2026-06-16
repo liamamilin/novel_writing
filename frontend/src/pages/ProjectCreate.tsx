@@ -98,7 +98,7 @@ export function ProjectCreate() {
     if (!projectId) return;
     setLoading(true);
     try {
-      await bibleApi.generate(projectId, selectedDirection || '');
+      await bibleApi.generate(projectId, selectedDirection || '', characters);
       await chaptersApi.plan(projectId, 1, '开场章节');
       notify('Bible \u751F\u6210\u5B8C\u6210\uFF0C\u5DF2\u521B\u5EFA\u7B2C 1 \u7AE0', 'success');
       navigate(`/project/${projectId}?ch=1&asset=chapter`);

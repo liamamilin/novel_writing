@@ -55,6 +55,13 @@ class BibleService:
         except Exception:
             return {}
 
+    def load_selected_direction(self, project_id: str) -> dict:
+        project_path = self.project_service.get_project_path(project_id)
+        direction_path = project_path / "bible" / "selected_direction.yaml"
+        if direction_path.exists():
+            return yaml.safe_load(direction_path.read_text(encoding="utf-8")) or {}
+        return {}
+
     def select_direction(self, project_id: str, variant_id: int, modifications: str = "") -> dict:
         project = self.project_service.get_project(project_id)
         project_path = self.project_service.get_project_path(project_id)

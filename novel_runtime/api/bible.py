@@ -34,12 +34,12 @@ async def generate_direction_variants(
     body: dict,
     svc: BibleService = Depends(get_bible_service),
 ):
-    svc.project_service.update_project(project_id, ProjectUpdate(
-        idea=body.get("idea", ""),
-        genre=body.get("genre", ""),
-        target_reader=body.get("target_reader", ""),
-        core_selling_point=body.get("core_selling_point", ""),
-    ))
+    update_fields = {}
+    for field in ["idea", "genre", "target_reader", "core_selling_point"]:
+        if body.get(field):
+            update_fields[field] = body[field]
+    if update_fields:
+        svc.project_service.update_project(project_id, ProjectUpdate(**update_fields))
     variants = svc.generate_direction_variants(project_id)
     return {"variants": variants}
 
@@ -50,7 +50,12 @@ async def generate_characters(
     body: dict,
     svc: BibleService = Depends(get_bible_service),
 ):
-    result = svc.generate_character_concepts(project_id, body.get("direction", {}))
+    direction_id = body.get("direction_id")
+    if direction_id:
+        direction_data = svc.load_selected_direction(project_id)
+    else:
+        direction_data = body.get("direction", {})
+    result = svc.generate_character_concepts(project_id, direction_data)
     return result
 
 
@@ -60,10 +65,16 @@ async def generate_bible(
     body: dict,
     svc: BibleService = Depends(get_bible_service),
 ):
+    direction_id = body.get("direction_id")
+    if direction_id:
+        direction_data = svc.load_selected_direction(project_id)
+    else:
+        direction_data = body.get("direction", {})
+    characters = body.get("characters", [])
     parts = svc.generate_bible(
         project_id,
-        body.get("direction", {}),
-        body.get("characters", []),
+        direction_data,
+        characters,
     )
     return {"bible_files": parts, "bible_version": svc.get_bible_version(project_id)}
 

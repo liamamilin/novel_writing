@@ -78,9 +78,24 @@ export function ChapterList() {
     );
   }
 
+  const handleCreateNext = async () => {
+    if (!currentProject) return;
+    const nextNum = Math.max(...chapters.map(c => c.chapter_number), 0) + 1;
+    setCreating(true);
+    try {
+      await chaptersApi.plan(currentProject.project_id, nextNum, '');
+      await loadChapters(currentProject.project_id);
+      notify(`第 ${nextNum} 章已创建`, 'success');
+    } catch (e) {
+      notify((e as Error).message, 'error');
+    } finally {
+      setCreating(false);
+    }
+  };
+
   return (
     <div className="space-y-1">
-      <h3 className="font-semibold text-sm text-gray-500 uppercase mb-1 px-2">\u7AE0\u8282</h3>
+      <h3 className="font-semibold text-sm text-gray-500 uppercase mb-1 px-2">章节</h3>
       {chapters.map((ch) => {
         const cfg = statusConfig[ch.status] || statusConfig.planned;
         return (
@@ -101,8 +116,8 @@ export function ChapterList() {
             }`}
           >
             <span>
-              \u7B2C {ch.chapter_number} \u7AE0
-              {ch.title ? ` \u2014 ${ch.title}` : ''}
+              第 {ch.chapter_number} 章
+              {ch.title ? ` — ${ch.title}` : ''}
             </span>
             <span className={`text-xs px-1.5 py-0.5 rounded ${cfg.bg} ${cfg.text}`}>
               {cfg.label}
@@ -110,6 +125,13 @@ export function ChapterList() {
           </button>
         );
       })}
+      <button
+        onClick={handleCreateNext}
+        disabled={creating}
+        className="w-full text-left px-3 py-1.5 text-sm mt-1 border border-dashed border-gray-300 rounded text-gray-500 hover:bg-gray-50 hover:text-blue-600 disabled:opacity-50"
+      >
+        {creating ? '创建中...' : `+ 创建第 ${Math.max(...chapters.map(c => c.chapter_number), 0) + 1} 章`}
+      </button>
     </div>
   );
 }
