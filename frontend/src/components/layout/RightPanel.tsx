@@ -9,11 +9,11 @@ import { stateApi } from '../../api/state';
 import { ExportModal } from '../chapter/ExportModal';
 
 const statusLabel: Record<string, string> = {
-  planned: '\u89C4\u5212',
-  drafted: '\u8349\u7A3F',
-  reviewed: '\u5DF2\u5BA1\u67E5',
-  approved: '\u5DF2\u786E\u8BA4',
-  locked: '\u5DF2\u9501\u5B9A',
+  planned: '规划',
+  drafted: '草稿',
+  reviewed: '已审查',
+  approved: '已确认',
+  locked: '已锁定',
 };
 
 interface ActionButton {
@@ -39,11 +39,11 @@ export function RightPanel() {
   const cancelStream = useStreamStore((s) => s.cancelStream);
 
   const runAction = async (key: string, fn: () => Promise<unknown>) => {
-    if (!pid) { notify('\u8BF7\u5148\u9009\u62E9\u9879\u76EE', 'error'); return; }
+    if (!pid) { notify('请先选择项目', 'error'); return; }
     setLoading(key);
     try {
       const result = await fn();
-      if (key !== 'check') notify(`${key} \u5B8C\u6210`, 'success');
+      if (key !== 'check') notify(`${key} 完成`, 'success');
       if (pid) await loadChapters(pid);
       return result;
     } catch (e) {
@@ -56,36 +56,36 @@ export function RightPanel() {
 
   const chapterActions: ActionButton[] = ch ? [
     {
-      label: '\u7F16\u8BD1\u4E0A\u4E0B\u6587',
+      label: '编译上下文',
       action: 'compile_context',
       apiCall: () => api.post(`/projects/${pid}/context/compile?chapter_number=${ch}`, {}),
     },
     {
-      label: '\u751F\u6210\u89C4\u5212',
+      label: '生成规划',
       action: 'plan',
       apiCall: () => chaptersApi.plan(pid!, ch!),
       requireStatus: ['planned'],
     },
     {
-      label: '\u751F\u6210\u8349\u7A3F',
+      label: '生成草稿',
       action: 'draft',
       apiCall: () => chaptersApi.draft(pid!, ch!),
       requireStatus: ['planned'],
     },
     {
-      label: '\u6587\u98CE\u6DA6\u8272',
+      label: '文风润色',
       action: 'polish',
       apiCall: () => chaptersApi.polish(pid!, ch!),
       requireStatus: ['drafted'],
     },
     {
-      label: '\u5BA1\u67E5 (4\u7EF4)',
+      label: '审查 (4维)',
       action: 'review',
       apiCall: () => chaptersApi.review(pid!, ch!, ['continuity', 'quality', 'cross_chapter', 'reader_sim']),
       requireStatus: ['drafted', 'reviewed'],
     },
     {
-      label: '\u786E\u8BA4\u7AE0\u8282',
+      label: '确认章节',
       action: 'approve',
       apiCall: async () => {
         const ok = window.confirm('确认将本章标记为"已确认"？之后将不可编辑。');
@@ -105,13 +105,13 @@ export function RightPanel() {
   return (
     <div className="h-full overflow-y-auto p-3 space-y-4">
       <div>
-        <h3 className="font-bold text-sm text-gray-500 uppercase mb-1">{"\uD83D\uDCC1"} \u9879\u76EE\u7BA1\u7406</h3>
+        <h3 className="font-bold text-sm text-gray-500 uppercase mb-1">{"\uD83D\uDCC1"} 项目管理</h3>
         <button
           onClick={async () => {
             if (!pid) { notify('请先选择项目', 'error'); return; }
             setLoading('check');
             try {
-              const res = await api.get<any>('/health');
+              const res = await api.rawGet<any>('/health');
               const llm = res.checks?.llm;
               const parts = [
                 `数据库: ${res.checks?.database?.status || '?'}`,
@@ -136,26 +136,26 @@ export function RightPanel() {
           disabled={!pid}
           className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 rounded border-b last:border-b-0 disabled:opacity-50"
         >
-          {"\u2B07"} \u5BFC\u51FA\u9879\u76EE
+          {"⬇"} 导出项目
         </button>
       </div>
 
       {showExport && pid && <ExportModal projectId={pid} onClose={() => setShowExport(false)} />}
 
       <div>
-        <h3 className="font-bold text-sm text-gray-500 uppercase mb-1">{"\uD83C\uDFA8"} \u6587\u98CE</h3>
+        <h3 className="font-bold text-sm text-gray-500 uppercase mb-1">{"\uD83C\uDFA8"} 文风</h3>
         <button
           onClick={() => selectAsset({ type: 'style' })}
           className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 rounded border-b last:border-b-0"
         >
-          \u67E5\u770B\u6587\u98CE\u8D44\u4EA7
+          查看文风资产
         </button>
       </div>
 
       {currentChapter && (
         <div>
           <h3 className="font-bold text-sm text-gray-500 uppercase mb-1">
-            {"\uD83D\uDCDD"} \u7B2C {ch} \u7AE0
+            {"\uD83D\uDCDD"} 第 {ch} 章
             <span className="ml-1 text-xs font-normal text-gray-400">
               ({statusLabel[currentChapter.status] || currentChapter.status})
             </span>
@@ -169,7 +169,7 @@ export function RightPanel() {
                 isActionEnabled(btn) ? 'hover:bg-blue-50' : 'text-gray-400 cursor-not-allowed'
               } ${loading === btn.label ? 'animate-pulse' : ''}`}
             >
-              {loading === btn.label ? '\u5904\u7406\u4E2D...' : btn.label}
+              {loading === btn.label ? '处理中...' : btn.label}
             </button>
           ))}
           {currentChapter.status === 'planned' && (
@@ -188,44 +188,44 @@ export function RightPanel() {
                 isStreaming ? 'text-red-600 hover:bg-red-50 font-medium' : 'hover:bg-blue-50'
               }`}
             >
-              {isStreaming ? '\u2715 \u505C\u6B62\u6D41\u5F0F' : '\u25B6 \u6D41\u5F0F\u751F\u6210\u8349\u7A3F'}
+              {isStreaming ? '✕ 停止流式' : '▶ 流式生成草稿'}
             </button>
           )}
         </div>
       )}
 
       <div>
-        <h3 className="font-bold text-sm text-gray-500 uppercase mb-1">{"\uD83D\uDCCA"} \u72B6\u6001</h3>
+        <h3 className="font-bold text-sm text-gray-500 uppercase mb-1">{"\uD83D\uDCCA"} 状态</h3>
         <button
-          onClick={() => runAction('\u66F4\u65B0\u72B6\u6001', () => stateApi.update(pid!, ch!))}
+          onClick={() => runAction('更新状态', () => stateApi.update(pid!, ch!))}
           disabled={!pid || !ch || !!loading}
           className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 rounded border-b last:border-b-0 disabled:opacity-50"
         >
-          \u66F4\u65B0\u72B6\u6001
+          更新状态
         </button>
         <button
           onClick={() => selectAsset({ type: 'state' })}
           className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 rounded border-b last:border-b-0"
         >
-          \u67E5\u770B\u5FEB\u7167
+          查看快照
         </button>
       </div>
 
       <div>
-        <h3 className="font-bold text-sm text-gray-500 uppercase mb-1">{"\uD83D\uDD0D"} \u5BA1\u67E5</h3>
+        <h3 className="font-bold text-sm text-gray-500 uppercase mb-1">{"\uD83D\uDD0D"} 审查</h3>
         <button
           onClick={() => selectAsset({ type: 'review' })}
           disabled={!currentChapter}
           className="w-full text-left px-3 py-2 text-sm hover:bg-blue-50 rounded border-b last:border-b-0 disabled:opacity-50"
         >
-          \u67E5\u770B\u5BA1\u67E5\u62A5\u544A
+          查看审查报告
         </button>
         <button
           onClick={() => selectAsset({ type: 'multi_reader' })}
           disabled={!currentChapter}
           className="w-full text-left px-3 py-2 text-sm hover:bg-purple-50 rounded border-b last:border-b-0 disabled:opacity-50 text-purple-700"
         >
-          {"\uD83D\uDCCA"} \u591A\u8BFB\u8005\u753B\u50CF
+          {"\uD83D\uDCCA"} 多读者画像
         </button>
       </div>
     </div>

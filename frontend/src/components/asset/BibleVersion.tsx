@@ -63,14 +63,14 @@ export function BibleVersion() {
   };
 
   if (!currentProject) {
-    return <div className="text-gray-400 text-sm py-4">\u8BF7\u5148\u9009\u62E9\u9879\u76EE</div>;
+    return <div className="text-gray-400 text-sm py-4">请先选择项目</div>;
   }
 
   return (
     <div className="space-y-4">
-      <h3 className="font-bold text-lg">Bible \u7248\u672C</h3>
+      <h3 className="font-bold text-lg">Bible 版本</h3>
 
-      {loading && <div className="text-gray-400 text-sm">\u52A0\u8F7D\u4E2D...</div>}
+      {loading && <div className="text-gray-400 text-sm">加载中...</div>}
 
       {changelog.length > 0 && (
         <div className="space-y-2">
@@ -92,7 +92,7 @@ export function BibleVersion() {
           onClick={handleCheckProposal}
           className="text-sm bg-blue-500 text-white px-3 py-1.5 rounded hover:bg-blue-600"
         >
-          \u67E5\u770B\u66F4\u65B0\u63D0\u8BAE
+          查看更新提议
         </button>
       </div>
 

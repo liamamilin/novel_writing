@@ -19,11 +19,12 @@ function buildHeaders(extra?: Record<string, string>): Record<string, string> {
   return headers;
 }
 
-async function request<T>(path: string, options?: RequestInit): Promise<T> {
+async function request<T>(path: string, options?: RequestInit, noPrefix?: boolean): Promise<T> {
+  const url = noPrefix ? path : `${BASE_URL}${path}`;
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), options?.method === 'POST' ? 120_000 : 60_000);
   try {
-    const res = await fetch(`${BASE_URL}${path}`, {
+    const res = await fetch(url, {
       headers: buildHeaders(options?.headers as Record<string, string> | undefined),
       signal: controller.signal,
       ...options,
@@ -44,6 +45,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 export const api = {
   get: <T>(path: string) => request<T>(path),
+  rawGet: <T>(path: string) => request<T>(path, undefined, true),
   post: <T>(path: string, body?: unknown) =>
     request<T>(path, { method: 'POST', body: body ? JSON.stringify(body) : undefined }),
   put: <T>(path: string, body?: unknown) =>

@@ -4,3 +4,15 @@ body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 }
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+.wmde-markdown img,
+.wmde-markdown-var img {
+  max-width: 100% !important;
+  max-height: 80vh !important;
+  object-fit: contain;
+}

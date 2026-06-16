@@ -30,25 +30,25 @@ export function StrategyForm() {
     if (!currentProject || !strategy) return;
     try {
       await api.put(`/projects/${currentProject.project_id}/strategy`, strategy);
-      notify('\u7B56\u7565\u5DF2\u4FDD\u5B58', 'success');
+      notify('策略已保存', 'success');
     } catch (e) {
       notify((e as Error).message, 'error');
     }
   };
 
-  if (!currentProject) return <div className="text-gray-400 text-sm py-4">\u8BF7\u5148\u9009\u62E9\u9879\u76EE</div>;
+  if (!currentProject) return <div className="text-gray-400 text-sm py-4">请先选择项目</div>;
 
-  if (loading) return <div className="text-gray-400 text-sm">\u52A0\u8F7D\u4E2D...</div>;
+  if (loading) return <div className="text-gray-400 text-sm">加载中...</div>;
 
-  if (!strategy) return <div className="text-gray-400 text-sm">\u6682\u65E0\u7B56\u7565\u914D\u7F6E</div>;
+  if (!strategy) return <div className="text-gray-400 text-sm">暂无策略配置</div>;
 
   return (
     <div className="space-y-4">
-      <h3 className="font-bold text-lg">\u5199\u4F5C\u7B56\u7565</h3>
+      <h3 className="font-bold text-lg">写作策略</h3>
 
       <div className="space-y-3">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">\u7AE0\u8282\u5B57\u6570\u8303\u56F4</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">章节字数范围</label>
           <div className="flex gap-2 items-center">
             <input
               type="number"
@@ -67,7 +67,7 @@ export function StrategyForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">\u8282\u594F\u7C7B\u578B</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">节奏类型</label>
           <input
             type="text"
             value={strategy.pacing_strategy.type}
@@ -77,7 +77,7 @@ export function StrategyForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">\u6700\u5927\u5E76\u884C\u5B50\u7EBF</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">最大并行子线</label>
           <input
             type="number"
             value={strategy.subplot_policy.max_simultaneous}
@@ -91,7 +91,7 @@ export function StrategyForm() {
         onClick={handleSave}
         className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 text-sm"
       >
-        \u4FDD\u5B58\u7B56\u7565
+        保存策略
       </button>
     </div>
   );

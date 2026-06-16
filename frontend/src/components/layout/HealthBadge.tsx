@@ -15,7 +15,7 @@ export function HealthBadge() {
   useEffect(() => {
     const check = async () => {
       try {
-        const res = await api.get<{ status: string; checks: HealthDetail }>('/health');
+        const res = await api.rawGet<{ status: string; checks: HealthDetail }>('/health');
         setStatus(res.status as 'ok' | 'degraded');
         setDetail(res.checks);
       } catch {

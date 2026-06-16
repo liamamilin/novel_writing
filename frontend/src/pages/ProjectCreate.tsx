@@ -29,7 +29,7 @@ export function ProjectCreate() {
 
   const handleCreateProject = async () => {
     if (!name || !genre) {
-      notify('\u8BF7\u586B\u5199\u9879\u76EE\u540D\u79F0\u548C\u7C7B\u578B', 'error');
+      notify('请填写项目名称和类型', 'error');
       return;
     }
     setLoading(true);
@@ -47,7 +47,7 @@ export function ProjectCreate() {
 
   const handleAnalyzeStyle = async () => {
     if (!projectId || !styleSample) {
-      notify('\u8BF7\u7C98\u8D34\u6587\u98CE\u6837\u672C', 'error');
+      notify('请粘贴文风样本', 'error');
       return;
     }
     setLoading(true);
@@ -56,7 +56,7 @@ export function ProjectCreate() {
       const result = await stylesApi.analyzeSync(projectId, [uploadResult.sample_id], 'default-style');
       const sid = result.style_id || 'default-style';
       setStyleId(sid);
-      notify('\u6587\u98CE\u5206\u6790\u5B8C\u6210', 'success');
+      notify('文风分析完成', 'success');
       setStep(3);
     } catch (e) {
       notify((e as Error).message, 'error');
@@ -80,7 +80,7 @@ export function ProjectCreate() {
 
   const handleGenerateCharacters = async () => {
     if (!projectId || !selectedDirection) {
-      notify('\u8BF7\u5148\u9009\u62E9\u65B9\u5411', 'error');
+      notify('请先选择方向', 'error');
       return;
     }
     setLoading(true);
@@ -100,7 +100,7 @@ export function ProjectCreate() {
     try {
       await bibleApi.generate(projectId, selectedDirection || '', characters);
       await chaptersApi.plan(projectId, 1, '开场章节');
-      notify('Bible \u751F\u6210\u5B8C\u6210\uFF0C\u5DF2\u521B\u5EFA\u7B2C 1 \u7AE0', 'success');
+      notify('Bible 生成完成，已创建第 1 章', 'success');
       navigate(`/project/${projectId}?ch=1&asset=chapter`);
     } catch (e) {
       notify((e as Error).message, 'error');
@@ -110,15 +110,15 @@ export function ProjectCreate() {
   };
 
   const steps = [
-    { n: 1, label: '\u521B\u5EFA\u9879\u76EE', hint: '\u586B\u5199\u9879\u76EE\u540D\u79F0\u3001\u7C7B\u578B\u548C\u521B\u610F' },
-    { n: 2, label: '\u6587\u98CE\u5206\u6790', hint: '\u4E0A\u4F20\u6837\u672C\u6587\u672C\uFF0CAI \u81EA\u52A8\u63D0\u53D6\u5199\u4F5C\u98CE\u683C\u7279\u5F81' },
-    { n: 3, label: '\u65B9\u5411+\u89D2\u8272', hint: '\u751F\u6210\u65B9\u5411\u53D8\u4F53 \u2192 \u9009\u62E9\u65B9\u5411 \u2192 \u751F\u6210\u89D2\u8272\u6982\u5FF5' },
-    { n: 4, label: 'Bible \u751F\u6210', hint: '\u751F\u6210\u5B8C\u6574 Bible\uFF08\u4EBA\u7269/\u4E16\u754C\u89C2/\u5377\u5927\u7EB2\uFF09\u2192 \u81EA\u52A8\u521B\u5EFA\u7B2C\u4E00\u7AE0' },
+    { n: 1, label: '创建项目', hint: '填写项目名称、类型和创意' },
+    { n: 2, label: '文风分析', hint: '上传样本文本，AI 自动提取写作风格特征' },
+    { n: 3, label: '方向+角色', hint: '生成方向变体 → 选择方向 → 生成角色概念' },
+    { n: 4, label: 'Bible 生成', hint: '生成完整 Bible（人物/世界观/卷大纲）→ 自动创建第一章' },
   ];
 
   return (
     <div className="max-w-2xl mx-auto py-8 px-4">
-      <h1 className="text-2xl font-bold mb-6">\u521B\u5EFA\u65B0\u9879\u76EE</h1>
+      <h1 className="text-2xl font-bold mb-6">创建新项目</h1>
 
       <div className="flex items-center gap-2 mb-8">
         {steps.map((s, i) => (
@@ -139,33 +139,39 @@ export function ProjectCreate() {
       {step === 1 && (
         <div className="space-y-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">\u9879\u76EE\u540D\u79F0 *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">项目名称 *</label>
             <input type="text" value={name} onChange={(e) => setName(e.target.value)}
-              className="w-full border rounded px-3 py-2 text-sm" placeholder="\u8F93\u5165\u5C0F\u8BF4\u540D\u79F0" />
+              className="w-full border rounded px-3 py-2 text-sm" placeholder="输入小说名称" />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">\u7C7B\u578B *</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">类型 *</label>
             <select value={genre} onChange={(e) => setGenre(e.target.value)}
               className="w-full border rounded px-3 py-2 text-sm">
-              <option value="">\u9009\u62E9\u7C7B\u578B</option>
-              <option value="\u90FD\u5E02">\u90FD\u5E02</option>
-              <option value="\u7384\u5E7B">\u7384\u5E7B</option>
-              <option value="\u4FEE\u4ED9">\u4FEE\u4ED9</option>
-              <option value="\u79D1\u5E7B">\u79D1\u5E7B</option>
-              <option value="\u60AC\u7591">\u60AC\u7591</option>
-              <option value="\u5386\u53F2">\u5386\u53F2</option>
+              <option value="">选择类型</option>
+              <option value="都市">都市</option>
+              <option value="玄幻">玄幻</option>
+              <option value="修仙">修仙</option>
+              <option value="科幻">科幻</option>
+              <option value="悬疑">悬疑</option>
+              <option value="历史">历史</option>
             </select>
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">\u521B\u610F\u7B80\u4ECB</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">创意简介</label>
             <textarea value={idea} onChange={(e) => setIdea(e.target.value)}
               className="w-full border rounded px-3 py-2 text-sm" rows={4}
-              placeholder="\u63CF\u8FF0\u4F60\u7684\u5C0F\u8BF4\u60F3\u6CD5..." />
+              placeholder="描述你的小说想法..." />
           </div>
-          <button onClick={handleCreateProject} disabled={loading}
-            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50">
-            {loading ? '\u521B\u5EFA\u4E2D...' : '\u4E0B\u4E00\u6B65'}
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => navigate('/')}
+              className="px-6 py-2 rounded text-gray-600 border border-gray-300 hover:bg-gray-50">
+              返回
+            </button>
+            <button onClick={handleCreateProject} disabled={loading}
+              className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50">
+              {loading ? '创建中...' : '下一步'}
+            </button>
+          </div>
         </div>
       )}
 
@@ -195,18 +201,24 @@ export function ProjectCreate() {
               </div>
             </details>
           </div>
-          <button onClick={handleAnalyzeStyle} disabled={loading}
-            className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50">
-            {loading ? '\u5206\u6790\u4E2D...' : '\u5206\u6790\u6587\u98CE'}
-          </button>
+          <div className="flex gap-2">
+            <button onClick={() => setStep(1)}
+              className="px-6 py-2 rounded text-gray-600 border border-gray-300 hover:bg-gray-50">
+              上一步
+            </button>
+            <button onClick={handleAnalyzeStyle} disabled={loading}
+              className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50">
+              {loading ? '分析中...' : '分析文风'}
+            </button>
+          </div>
           {styleId && (
             <div className="text-sm text-green-700 bg-green-50 p-3 rounded">
-              \u6587\u98CE\u5206\u6790\u5B8C\u6210\uFF0Cstyle_id: {styleId}
+              文风分析完成，style_id: {styleId}
             </div>
           )}
           <button onClick={() => setStep(3)} disabled={!styleId}
             className="bg-blue-500 text-white px-6 py-2 rounded hover:bg-blue-600 disabled:opacity-50">
-            \u4E0B\u4E00\u6B65
+            下一步
           </button>
         </div>
       )}
@@ -216,20 +228,20 @@ export function ProjectCreate() {
           <div>
             <button onClick={handleGenerateDirections} disabled={loading}
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 text-sm">
-              {loading ? '\u751F\u6210\u4E2D...' : '\u751F\u6210\u65B9\u5411\u53D8\u4F53'}
+              {loading ? '生成中...' : '生成方向变体'}
             </button>
           </div>
 
           {directions.length > 0 && (
             <div className="space-y-2">
-              <h3 className="font-medium text-sm">\u9009\u62E9\u4E00\u4E2A\u65B9\u5411</h3>
+              <h3 className="font-medium text-sm">选择一个方向</h3>
               {directions.map((d, i) => (
                 <button key={i}
                   onClick={() => setSelectedDirection(d.direction_id || String(i))}
                   className={`w-full text-left border rounded p-3 text-sm ${
                     selectedDirection === (d.direction_id || String(i)) ? 'border-blue-500 bg-blue-50' : 'hover:bg-gray-50'
                   }`}>
-                  <div className="font-medium">{d.title || `\u65B9\u5411 ${i + 1}`}</div>
+                  <div className="font-medium">{d.title || `方向 ${i + 1}`}</div>
                   <div className="text-gray-500 text-xs mt-1">{d.description || d.summary || ''}</div>
                 </button>
               ))}
@@ -239,26 +251,32 @@ export function ProjectCreate() {
           {selectedDirection && (
             <button onClick={handleGenerateCharacters} disabled={loading}
               className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 disabled:opacity-50 text-sm">
-              \u751F\u6210\u89D2\u8272\u6982\u5FF5
+              生成角色概念
             </button>
           )}
 
           {characters.length > 0 && (
             <div className="space-y-2">
-              <h3 className="font-medium text-sm">\u89D2\u8272\u6982\u5FF5</h3>
+              <h3 className="font-medium text-sm">角色概念</h3>
               {characters.map((c, i) => (
                 <div key={i} className="border rounded p-3 text-sm">
-                  <div className="font-medium">{c.name || `\u89D2\u8272 ${i + 1}`}</div>
+                  <div className="font-medium">{c.name || `角色 ${i + 1}`}</div>
                   <div className="text-gray-500 text-xs mt-1">{c.description || c.role || ''}</div>
                 </div>
               ))}
             </div>
           )}
 
-          <button onClick={handleGenerateBible} disabled={loading}
-            className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 disabled:opacity-50">
-            {loading ? '\u751F\u6210\u4E2D...' : '\u751F\u6210 Bible \u5E76\u5F00\u59CB'}
-          </button>
+          <div className="flex gap-2 items-center">
+            <button onClick={() => setStep(2)}
+              className="px-6 py-2 rounded text-gray-600 border border-gray-300 hover:bg-gray-50">
+              上一步
+            </button>
+            <button onClick={handleGenerateBible} disabled={loading}
+              className="bg-green-500 text-white px-6 py-2 rounded hover:bg-green-600 disabled:opacity-50">
+              {loading ? '生成中...' : '生成 Bible 并开始'}
+            </button>
+          </div>
         </div>
       )}
     </div>

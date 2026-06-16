@@ -7,12 +7,12 @@ interface StateDiffProps {
   newTitle?: string;
 }
 
-export function StateDiff({ oldText, newText, oldTitle = '\u66F4\u65B0\u524D', newTitle = '\u66F4\u65B0\u540E' }: StateDiffProps) {
+export function StateDiff({ oldText, newText, oldTitle = '更新前', newTitle = '更新后' }: StateDiffProps) {
   return (
     <div className="space-y-2">
       <div className="flex items-center gap-4 text-sm text-gray-500">
         <span className="bg-red-50 text-red-700 px-2 py-0.5 rounded">{oldTitle}</span>
-        <span>\u2192</span>
+        <span>→</span>
         <span className="bg-green-50 text-green-700 px-2 py-0.5 rounded">{newTitle}</span>
       </div>
       <div className="border rounded overflow-hidden">

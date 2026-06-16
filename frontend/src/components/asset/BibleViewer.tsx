@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useProjectStore } from '../../stores/projectStore';
 import { useUIStore } from '../../stores/uiStore';
 import { bibleApi } from '../../api/bible';
+import { useNavigate } from 'react-router-dom';
 
 const BIBLE_TABS = [
   { key: 'character_profiles.md', label: '角色档案' },
@@ -15,13 +16,18 @@ const BIBLE_TABS = [
 export function BibleViewer() {
   const currentProject = useProjectStore((s) => s.currentProject);
   const notify = useUIStore((s) => s.notify);
+  const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('character_profiles.md');
   const [content, setContent] = useState('');
   const [changelog, setChangelog] = useState<{ version: number; changes: string[] }[]>([]);
   const [loading, setLoading] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editText, setEditText] = useState('');
 
   useEffect(() => {
     if (!currentProject) return;
+    setEditing(false);
     setLoading(true);
     bibleApi.get(currentProject.project_id).then((data) => {
       if (activeTab === 'version') return;
@@ -86,9 +92,91 @@ export function BibleViewer() {
       )}
 
       {!loading && activeTab !== 'version' && (
-        <div className="prose prose-sm max-w-none whitespace-pre-wrap text-sm">
-          {content || '(暂无内容)'}
-        </div>
+        <>
+          {editing ? (
+            <textarea
+              value={editText}
+              onChange={(e) => setEditText(e.target.value)}
+              className="w-full border rounded px-3 py-2 text-sm font-mono"
+              rows={20}
+            />
+          ) : (
+            <div className="prose prose-sm max-w-none whitespace-pre-wrap text-sm overflow-hidden">
+              {content || '(暂无内容)'}
+            </div>
+          )}
+          {!content && !editing && (
+            <div className="bg-gray-50 rounded p-4 space-y-3 border">
+              <p className="text-sm text-gray-500">
+                当前项目还没有 Bible。推荐使用初始化向导生成完整的方向设定和角色概念，再生成 Bible。
+              </p>
+              <p className="text-sm text-gray-400">
+                也可以基于当前项目信息一键补全（质量取决于项目类型的完善程度）。
+              </p>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => navigate('/project/new')}
+                  className="bg-blue-500 text-white px-4 py-1.5 text-sm rounded hover:bg-blue-600"
+                >
+                  推荐：进入初始化向导
+                </button>
+                <button
+                  onClick={async () => {
+                    if (!currentProject) return;
+                    const lowInfo = !currentProject.idea && !currentProject.target_reader && !currentProject.core_selling_point;
+                    if (lowInfo && !window.confirm('项目简介等信息为空，生成质量可能较低，是否继续？')) return;
+                    setGenerating(true);
+                    try {
+                      await bibleApi.generate(currentProject.project_id, '', []);
+                      notify('Bible 已生成', 'success');
+                      handleTabChange(activeTab);
+                    } catch (e) {
+                      notify((e as Error).message, 'error');
+                    } finally {
+                      setGenerating(false);
+                    }
+                  }}
+                  disabled={generating}
+                  className="px-4 py-1.5 text-sm rounded border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50"
+                >
+                  {generating ? '生成中...' : '一键补全 Bible'}
+                </button>
+              </div>
+              <button
+                onClick={() => { setEditText(content); setEditing(true); }}
+                className="text-xs text-gray-400 hover:text-gray-600"
+              >
+                手动编辑
+              </button>
+            </div>
+          )}
+          {editing && (
+            <div className="flex gap-2 mt-3">
+              <button
+                onClick={async () => {
+                  if (!currentProject) return;
+                  try {
+                    await bibleApi.applyUpdate(currentProject.project_id, [{ file: activeTab, section: '', change: editText, reason: '手动编辑' }]);
+                    setContent(editText);
+                    setEditing(false);
+                    notify('已保存', 'success');
+                  } catch (e) {
+                    notify((e as Error).message, 'error');
+                  }
+                }}
+                className="bg-green-500 text-white px-4 py-1.5 text-sm rounded hover:bg-green-600"
+              >
+                保存
+              </button>
+              <button
+                onClick={() => setEditing(false)}
+                className="px-4 py-1.5 text-sm rounded border border-gray-300 text-gray-600 hover:bg-gray-50"
+              >
+                取消
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {activeTab === 'version' && (

@@ -48,7 +48,8 @@ function MainLayout() {
     }
   }, [id, currentProject, selectProject, clearChapters, loadProjects, selectAsset]);
 
-  // N1: restore chapter/asset from URL query after chapters load
+  // N1: restore chapter/asset from URL query after chapters load.
+  // Auto-select first chapter if none specified.
   useEffect(() => {
     if (!currentProject || chapters.length === 0) return;
     const chParam = searchParams.get('ch');
@@ -58,6 +59,10 @@ function MainLayout() {
         setCurrentChapter(ch);
         selectAsset({ type: 'chapter', id: ch.chapter_id });
       }
+    } else if (!useChapterStore.getState().currentChapter) {
+      const first = chapters[0];
+      setCurrentChapter(first);
+      selectAsset({ type: 'chapter', id: first.chapter_id });
     }
   }, [currentProject?.project_id, chapters.length]);
 

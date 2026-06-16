@@ -36,7 +36,7 @@ export function ProjectList() {
         genre: '都市修仙',
         idea: '一个被家族抛弃的年轻人意外获得古老传承，在现代都市中崛起。',
       });
-      notify('示例项目已创建', 'success');
+      notify('空白项目已创建，请进入 Bible 页补全设定', 'success');
       await loadProjects();
       navigate('/project/' + result.project_id);
     } catch (e) {
@@ -55,7 +55,7 @@ export function ProjectList() {
           disabled={demoLoading}
           className="text-sm text-gray-500 hover:text-blue-600 border border-gray-300 rounded px-3 py-1.5 disabled:opacity-50"
         >
-          {demoLoading ? '创建中...' : '快速创建（空白）'}
+          {demoLoading ? '创建中...' : '创建空白项目'}
         </button>
       </div>
       <Link

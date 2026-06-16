@@ -105,6 +105,14 @@ class RequestLoggingMiddleware:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    # Respect pre-configured app state (used by test fixtures with TestClient)
+    preconfigured_db = getattr(app.state, "db", None)
+    preconfigured_settings = getattr(app.state, "settings", None)
+    if preconfigured_db is not None and preconfigured_settings is not None:
+        logger.info("lifespan: using pre-configured app state (test mode)")
+        yield
+        return
+
     setup_logging(settings)
 
     storage_path = Path(settings.storage_base_path)

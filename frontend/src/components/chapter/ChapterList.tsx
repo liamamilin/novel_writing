@@ -8,11 +8,11 @@ import { chaptersApi } from '../../api/chapters';
 import { bibleApi } from '../../api/bible';
 
 const statusConfig: Record<string, { bg: string; text: string; label: string; icon: string }> = {
-  planned: { bg: 'bg-gray-200', text: 'text-gray-600', label: '\u89C4\u5212', icon: '\uD83D\uDCDD' },
-  drafted: { bg: 'bg-yellow-200', text: 'text-yellow-700', label: '\u8349\u7A3F', icon: '\u270F\uFE0F' },
-  reviewed: { bg: 'bg-blue-200', text: 'text-blue-700', label: '\u5DF2\u5BA1\u67E5', icon: '\uD83D\uDD0D' },
-  approved: { bg: 'bg-green-200', text: 'text-green-700', label: '\u5DF2\u786E\u8BA4', icon: '\u2705' },
-  locked: { bg: 'bg-gray-400', text: 'text-gray-800', label: '\u5DF2\u9501\u5B9A', icon: '\uD83D\uDD12' },
+  planned: { bg: 'bg-gray-200', text: 'text-gray-600', label: '规划', icon: '\uD83D\uDCDD' },
+  drafted: { bg: 'bg-yellow-200', text: 'text-yellow-700', label: '草稿', icon: '✏️' },
+  reviewed: { bg: 'bg-blue-200', text: 'text-blue-700', label: '已审查', icon: '\uD83D\uDD0D' },
+  approved: { bg: 'bg-green-200', text: 'text-green-700', label: '已确认', icon: '✅' },
+  locked: { bg: 'bg-gray-400', text: 'text-gray-800', label: '已锁定', icon: '\uD83D\uDD12' },
 };
 
 export function ChapterList() {
@@ -37,7 +37,7 @@ export function ChapterList() {
   if (!currentProject) {
     return (
       <div className="text-sm text-gray-400 px-2 py-4">
-        \u8BF7\u5148\u9009\u62E9\u9879\u76EE
+        请先选择项目
       </div>
     );
   }
@@ -66,13 +66,13 @@ export function ChapterList() {
     };
     return (
       <div className="text-sm text-gray-400 px-2 py-4 space-y-2">
-        <p>\u6682\u65E0\u7AE0\u8282</p>
+        <p>暂无章节</p>
         <button
           onClick={handleCreateFirst}
           disabled={creating}
           className="bg-blue-500 text-white px-3 py-1.5 rounded text-xs hover:bg-blue-600 disabled:opacity-50"
         >
-          {creating ? '\u521B\u5EFA\u4E2D...' : '+ \u521B\u5EFA\u7B2C 1 \u7AE0'}
+          {creating ? '创建中...' : '+ 创建第 1 章'}
         </button>
       </div>
     );

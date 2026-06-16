@@ -261,7 +261,7 @@ export function ChapterEditor() {
           />
         </div>
       ) : (
-        <div className="flex-1" data-color-mode="light">
+        <div className="flex-1 overflow-hidden" data-color-mode="light">
           <Suspense fallback={<div className="flex items-center justify-center h-full text-gray-400 text-sm">加载编辑器...</div>}>
             <MDEditor
               value={isStreaming ? streamedContent : content}

@@ -5,6 +5,7 @@ import { lazy, Suspense, useState, useEffect } from 'react';
 import { chaptersApi } from '../../api/chapters';
 import type { ReviewData } from '../review/ReviewTabs';
 import { api } from '../../api/client';
+import { ErrorBoundary } from '../ErrorBoundary';
 
 const ChapterEditor = lazy(() => import('../chapter/ChapterEditor').then(m => ({ default: m.ChapterEditor })));
 const ReviewTabs = lazy(() => import('../review/ReviewTabs').then(m => ({ default: m.ReviewTabs })));
@@ -32,58 +33,62 @@ export function CenterPanel() {
   const currentChapter = useChapterStore((s) => s.currentChapter);
   const currentProject = useProjectStore((s) => s.currentProject);
 
-  if (selectedAsset) {
-    if (selectedAsset.type === 'chapter' && currentChapter) {
-      return (
-        <div className="h-full p-4 overflow-y-auto">
-          <Suspense fallback={<Loading />}>
-            <ChapterEditor />
-          </Suspense>
-        </div>
-      );
+  const renderContent = () => {
+    if (selectedAsset) {
+      if (selectedAsset.type === 'chapter' && currentChapter) {
+        return (
+          <div className="h-full p-4 overflow-y-auto overflow-x-hidden">
+            <Suspense fallback={<Loading />}>
+              <ChapterEditor />
+            </Suspense>
+          </div>
+        );
+      }
+
+      if (selectedAsset.type === 'review' && currentProject && currentChapter) {
+        return <ReviewPanel projectId={currentProject.project_id} chapterNumber={currentChapter.chapter_number} />;
+      }
+
+      if (selectedAsset.type === 'style') {
+        return (
+          <div className="h-full p-4 overflow-y-auto overflow-x-hidden">
+            <Suspense fallback={<Loading />}>
+              <StyleViewer />
+            </Suspense>
+          </div>
+        );
+      }
+
+      if (selectedAsset.type === 'multi_reader' && currentProject && currentChapter) {
+        return (
+          <div className="h-full p-4 overflow-y-auto overflow-x-hidden">
+            <Suspense fallback={<Loading />}>
+              <MultiReaderChart projectId={currentProject.project_id} chapterNumber={currentChapter.chapter_number} />
+            </Suspense>
+          </div>
+        );
+      }
+
+      const Component = assetComponents[selectedAsset.type];
+      if (Component) {
+        return (
+          <div className="h-full p-4 overflow-y-auto overflow-x-hidden">
+            <Suspense fallback={<Loading />}>
+              <Component />
+            </Suspense>
+          </div>
+        );
+      }
     }
 
-    if (selectedAsset.type === 'review' && currentProject && currentChapter) {
-      return <ReviewPanel projectId={currentProject.project_id} chapterNumber={currentChapter.chapter_number} />;
-    }
+    return (
+      <div className="flex items-center justify-center h-full text-gray-400">
+        <p>选择左侧资产或章节开始编辑</p>
+      </div>
+    );
+  };
 
-    if (selectedAsset.type === 'style') {
-      return (
-        <div className="h-full p-4 overflow-y-auto">
-          <Suspense fallback={<Loading />}>
-            <StyleViewer />
-          </Suspense>
-        </div>
-      );
-    }
-
-    if (selectedAsset.type === 'multi_reader' && currentProject && currentChapter) {
-      return (
-        <div className="h-full p-4 overflow-y-auto">
-          <Suspense fallback={<Loading />}>
-            <MultiReaderChart projectId={currentProject.project_id} chapterNumber={currentChapter.chapter_number} />
-          </Suspense>
-        </div>
-      );
-    }
-
-    const Component = assetComponents[selectedAsset.type];
-    if (Component) {
-      return (
-        <div className="h-full p-4 overflow-y-auto">
-          <Suspense fallback={<Loading />}>
-            <Component />
-          </Suspense>
-        </div>
-      );
-    }
-  }
-
-  return (
-    <div className="flex items-center justify-center h-full text-gray-400">
-      <p>选择左侧资产或章节开始编辑</p>
-    </div>
-  );
+  return <ErrorBoundary>{renderContent()}</ErrorBoundary>;
 }
 
 function ReviewPanel({ projectId, chapterNumber }: { projectId: string; chapterNumber: number }) {

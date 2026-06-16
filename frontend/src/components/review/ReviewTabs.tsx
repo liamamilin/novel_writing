@@ -1,10 +1,10 @@
 import { useState } from 'react';
 
 const TABS = [
-  { key: 'continuity', label: '\u8FDE\u8D2F\u6027' },
-  { key: 'quality', label: '\u8D28\u91CF' },
-  { key: 'cross_chapter', label: '\u8DE8\u7AE0' },
-  { key: 'reader_sim', label: '\u8BFB\u8005\u6A21\u62DF' },
+  { key: 'continuity', label: '连贯性' },
+  { key: 'quality', label: '质量' },
+  { key: 'cross_chapter', label: '跨章' },
+  { key: 'reader_sim', label: '读者模拟' },
 ] as const;
 
 export interface FixInstruction {
@@ -54,7 +54,7 @@ export function ReviewTabs({ reviews, onApplyFix }: ReviewTabsProps) {
       </div>
 
       {!data ? (
-        <div className="text-gray-400 text-sm py-8 text-center">\u6682\u65E0\u5BA1\u67E5\u6570\u636E</div>
+        <div className="text-gray-400 text-sm py-8 text-center">暂无审查数据</div>
       ) : (
         <>
           {data.summary && (
@@ -63,7 +63,7 @@ export function ReviewTabs({ reviews, onApplyFix }: ReviewTabsProps) {
 
           {data.issues.length > 0 && (
             <div>
-              <h4 className="font-semibold text-sm mb-2">\u53D1\u73B0\u95EE\u9898</h4>
+              <h4 className="font-semibold text-sm mb-2">发现问题</h4>
               <ul className="space-y-1">
                 {data.issues.map((issue, i) => (
                   <li key={i} className="text-sm text-gray-700 pl-3 border-l-2 border-gray-300">
@@ -76,7 +76,7 @@ export function ReviewTabs({ reviews, onApplyFix }: ReviewTabsProps) {
 
           {data.fix_instructions.length > 0 && (
             <div>
-              <h4 className="font-semibold text-sm mb-2">\u4FEE\u590D\u6307\u4EE4</h4>
+              <h4 className="font-semibold text-sm mb-2">修复指令</h4>
               <div className="space-y-2">
                 {[...data.fix_instructions]
                   .sort((a, b) => (severityOrder[a.severity] ?? 9) - (severityOrder[b.severity] ?? 9))
@@ -96,7 +96,7 @@ export function ReviewTabs({ reviews, onApplyFix }: ReviewTabsProps) {
                           onClick={() => onApplyFix(fix)}
                           className="text-xs text-blue-600 hover:text-blue-800 shrink-0 ml-2"
                         >
-                          \u5E94\u7528\u4FEE\u590D
+                          应用修复
                         </button>
                       )}
                     </div>
