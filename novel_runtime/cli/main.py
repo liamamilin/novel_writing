@@ -38,9 +38,6 @@ cache_app = typer.Typer()
 app.add_typer(cache_app, name="cache", help="LLM 缓存管理")
 
 console = Console()
-PROMPTS_DIR = Path("prompts")
-
-
 def _get_services():
     settings = Settings()
     storage_base = Path(settings.storage_base_path)
@@ -48,7 +45,7 @@ def _get_services():
     db = Database(settings.db_path or str(storage_base / "nwr.db"))
     db.init_db()
     provider = create_provider(settings)
-    loader = PromptLoader(PROMPTS_DIR)
+    loader = PromptLoader()
     project_svc = ProjectService(db, storage_base)
     return settings, provider, loader, project_svc, db, storage_base
 

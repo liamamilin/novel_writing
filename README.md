@@ -14,23 +14,44 @@
 - **SSE 流式生成**：前端实时渲染生成过程
 - **57 个 REST API 端点**
 
+## 前置要求
+
+| 组件 | 版本要求 | 用途 |
+|------|---------|------|
+| Python | >= 3.10 | 后端运行 |
+| Node.js | >= 18 | 前端构建 |
+| LLM API | OpenAI 兼容端点 | 所有 AI 功能依赖 |
+
 ## 快速开始
 
-### 1. 配置
+### 1. 配置 LLM
+
+需要准备一个 OpenAI 兼容的 API 端点。例如 [OpenAI](https://platform.openai.com/api-keys) 或 [DeepSeek](https://platform.deepseek.com/api_keys)：
 
 ```bash
 cp .env.example .env
-# 编辑 .env: 填入 LLM_API_KEY / NWR_LLM_BASE_URL / NWR_LLM_MODEL
+# 编辑 .env，填入你的 LLM 密钥和端点
+# 示例（OpenAI）:
+#   LLM_API_KEY=sk-proj-xxxxx
+#   NWR_LLM_BASE_URL=https://api.openai.com/v1
+#   NWR_LLM_MODEL=gpt-4o-mini
 ```
 
-### 2. 后端
+### 2. 启动后端
 
 ```bash
 pip install -e ".[dev]"
 uvicorn novel_runtime.main:app --reload
 ```
 
-### 3. 前端
+验证配置：
+```bash
+curl http://localhost:8000/health | python3 -m json.tool
+# 输出中 "checks.llm.status" 应为 "ok" 或 "degraded"
+# 如果为 degraded，查看 detail 字段排查
+```
+
+### 3. 启动前端
 
 ```bash
 cd frontend
@@ -38,9 +59,9 @@ npm install
 npm run dev
 ```
 
-访问 `http://localhost:3000`。
+访问 `http://localhost:3000`。点"+ 新建项目"进入三步向导。
 
-### 4. Docker
+### 4. Docker 一键启动
 
 ```bash
 docker compose up -d

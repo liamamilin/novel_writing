@@ -123,6 +123,18 @@ async def lifespan(app: FastAPI):
     else:
         logger.info("no_orphans_found")
 
+    config_issues = []
+    if not settings.llm_base_url:
+        config_issues.append("NWR_LLM_BASE_URL not set")
+    if not settings.llm_model:
+        config_issues.append("NWR_LLM_MODEL not set")
+    if not os.environ.get(settings.llm_api_key_env, ""):
+        config_issues.append(f"{settings.llm_api_key_env} not set")
+    if config_issues:
+        logger.warning("config_missing", extra={"issues": config_issues})
+    else:
+        logger.info("config_ok")
+
     logger.info("server_started", extra={"version": "0.1.0", "storage": str(storage_path)})
 
     yield
@@ -200,9 +212,11 @@ async def novel_runtime_error_handler(request: Request, exc: NovelRuntimeError):
 
 @app.exception_handler(Exception)
 async def unexpected_error_handler(request: Request, exc: Exception):
+    rid = request_id_var.get()
+    logger.error("unhandled_exception", extra={"error": str(exc), "request_id": rid})
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal server error"},
+        content={"detail": "Internal server error", "request_id": rid},
     )
 
 

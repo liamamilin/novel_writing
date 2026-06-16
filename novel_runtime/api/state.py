@@ -17,7 +17,7 @@ def get_service(request: Request) -> StateService:
     settings = request.app.state.settings
     db = request.app.state.db
     provider = create_provider(settings)
-    loader = PromptLoader(Path("prompts"))
+    loader = PromptLoader()
     project_svc = ProjectService(db, Path(settings.storage_base_path))
     return StateService(project_svc, provider, loader)
 

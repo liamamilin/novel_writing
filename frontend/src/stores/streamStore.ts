@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { fetchEventSource } from '@microsoft/fetch-event-source';
 import { getToken } from '../api/client';
+import { useUIStore } from './uiStore';
 
 interface StreamStore {
   isStreaming: boolean;
@@ -34,6 +35,11 @@ export const useStreamStore = create<StreamStore>((set) => {
           onmessage(ev) {
             try {
               const data = JSON.parse(ev.data);
+              if (data.error) {
+                try { useUIStore.getState().notify(data.error, 'error'); } catch {}
+                set({ isStreaming: false });
+                return;
+              }
               if (data.token) {
                 full += data.token;
                 set({ streamedContent: full });
@@ -47,6 +53,7 @@ export const useStreamStore = create<StreamStore>((set) => {
             set({ isStreaming: false });
           },
           onerror(err) {
+            try { useUIStore.getState().notify(String(err), 'error'); } catch {}
             set({ isStreaming: false });
             throw err;
           },

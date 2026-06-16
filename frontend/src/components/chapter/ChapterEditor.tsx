@@ -135,13 +135,7 @@ export function ChapterEditor() {
         />
       </div>
 
-      {isStreaming && (
-        <div className="flex items-center gap-2 mb-3 bg-blue-50 border border-blue-200 text-blue-700 text-sm px-3 py-2 rounded">
-          <span className="inline-block w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-          正在流式生成草稿...
-          <span className="ml-auto text-xs text-blue-400">{streamedContent.length} chars</span>
-        </div>
-      )}
+      {isStreaming && <StreamingProgress chars={streamedContent.length} />}
 
       {showDiff ? (
         <div className="flex-1 overflow-auto">
@@ -172,6 +166,28 @@ export function ChapterEditor() {
           />
         </div>
       )}
+    </div>
+  );
+}
+
+function StreamingProgress({ chars }: { chars: number }) {
+  const [startTime] = useState(Date.now());
+  const [elapsed, setElapsed] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => setElapsed(Date.now() - startTime), 1000);
+    return () => clearInterval(id);
+  }, [startTime]);
+  const sec = Math.floor(elapsed / 1000);
+  const mm = String(Math.floor(sec / 60)).padStart(2, '0');
+  const ss = String(sec % 60).padStart(2, '0');
+  const cps = sec > 0 ? (chars / sec).toFixed(0) : '...';
+  return (
+    <div className="flex items-center gap-2 mb-3 bg-blue-50 border border-blue-200 text-blue-700 text-sm px-3 py-2 rounded">
+      <span className="inline-block w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
+      正在流式生成草稿...
+      <span className="ml-auto text-xs text-blue-400">
+        {chars} chars | {cps} c/s | {mm}:{ss}
+      </span>
     </div>
   );
 }

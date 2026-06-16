@@ -19,7 +19,7 @@ def get_bible_service(request: Request) -> BibleService:
     settings = request.app.state.settings
     db = request.app.state.db
     provider = create_provider(settings)
-    loader = PromptLoader(Path("prompts"))
+    loader = PromptLoader()
     project_svc = ProjectService(db, Path(settings.storage_base_path))
     return BibleService(db, project_svc, provider, loader)
 

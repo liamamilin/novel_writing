@@ -2,9 +2,13 @@ from __future__ import annotations
 from pathlib import Path
 
 
+def get_prompts_dir() -> Path:
+    return Path(__file__).resolve().parent.parent.parent / "prompts"
+
+
 class PromptLoader:
-    def __init__(self, prompts_dir: str | Path):
-        self.prompts_dir = Path(prompts_dir)
+    def __init__(self, prompts_dir: str | Path | None = None):
+        self.prompts_dir = Path(prompts_dir) if prompts_dir else get_prompts_dir()
         self._cache: dict[str, str] = {}
 
     def load(self, template_name: str, variables: dict | None = None) -> str:

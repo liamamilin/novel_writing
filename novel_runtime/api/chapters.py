@@ -21,7 +21,7 @@ def get_services(request: Request):
     settings = request.app.state.settings
     db = request.app.state.db
     provider = create_provider(settings)
-    loader = PromptLoader(Path("prompts"))
+    loader = PromptLoader()
     project_svc = ProjectService(db, Path(settings.storage_base_path))
     return settings, provider, loader, project_svc, db
 
@@ -30,7 +30,7 @@ def get_chapter_service(request: Request) -> ChapterService:
     settings = request.app.state.settings
     db = request.app.state.db
     provider = create_provider(settings)
-    loader = PromptLoader(Path("prompts"))
+    loader = PromptLoader()
     project_svc = ProjectService(db, Path(settings.storage_base_path))
     ctx_svc = ContextService(project_svc, provider, loader)
     return ChapterService(project_svc, ctx_svc, provider, loader)
@@ -46,7 +46,7 @@ def get_review_service(request: Request) -> ReviewService:
     settings = request.app.state.settings
     db = request.app.state.db
     provider = create_provider(settings)
-    loader = PromptLoader(Path("prompts"))
+    loader = PromptLoader()
     project_svc = ProjectService(db, Path(settings.storage_base_path))
     return ReviewService(project_svc, provider, loader)
 
@@ -158,10 +158,13 @@ async def generate_draft_stream(
         })
 
         full_text = ""
-        for chunk in provider.generate_stream(write_prompt):
-            full_text += chunk
-            yield f"data: {json_mod.dumps({'token': chunk})}\n\n"
-        yield f"data: {json_mod.dumps({'done': True, 'full': full_text})}\n\n"
+        try:
+            for chunk in provider.generate_stream(write_prompt):
+                full_text += chunk
+                yield f"data: {json_mod.dumps({'token': chunk})}\n\n"
+            yield f"data: {json_mod.dumps({'done': True, 'full': full_text})}\n\n"
+        except Exception as e:
+            yield f"data: {json_mod.dumps({'error': str(e), 'partial': full_text})}\n\n"
 
     return StreamingResponse(event_stream(), media_type="text/event-stream")
 
