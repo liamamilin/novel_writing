@@ -9,7 +9,7 @@ pytest tests/ -q                                 # ALL tests (includes e2e → n
 pytest tests/unit tests/integration -q           # offline-safe (mock LLM)
 pytest tests/e2e/ -q                             # needs LLM_API_KEY (network)
 ruff check novel_runtime/ tests/                 # CI lint gate (line-length 120, py310, E501 ignored)
-cd frontend && npm install && npm run dev        # frontend :3000
+cd frontend && npm install && npm run dev        # frontend :5173 (not :3000!)
 cd frontend && npm run build                     # production (tsc + vite)
 cd frontend && npm run lint                      # eslint
 novel --help                                     # Typer CLI (entry: novel_runtime.cli.main:app)
@@ -57,3 +57,8 @@ docker compose up -d                              # full stack
 - e2e tests (`tests/e2e/`) hit a real LLM via `LLM_API_KEY`. For offline runs use `pytest tests/unit tests/integration -q`.
 - `npm run build` runs `tsc -b && vite build` (TypeScript check + production build). A failing `tsc` also fails the build.
 - The `novel` CLI entrypoint (Typer) is defined at `novel_runtime/cli/main.py`. Use `novel --help` to discover commands.
+- Vite dev server runs on port **5173** (not 3000). The README's `:3000` is the Docker/Nginx production port.
+- `api.rawGet('/health')` for root-level endpoints. The `api` client prefixes `/api` automatically, but `/health` and `/metrics` live at the root (no `/api` prefix). Use `api.rawGet()` bypass added in `client.ts`.
+- Always write Chinese text directly (actual characters) in `.tsx` files, not `\uXXXX` JS escape sequences. Unicode escapes make code unreadable and fragile in the build pipeline.
+- Lazy-loaded CenterPanel components can throw blank pages on import errors. New `ErrorBoundary` wraps the panel — add new lazy components inside it. If `useNavigate` is used in a lazy component, the `import` for `useNavigate` must be at the file top (not inside a lazy `then()` callback).
+- Project/chapter auto-select: `App.tsx` auto-selects the first chapter when navigating to a project URL without `?ch=N`. Modifying chapter selection logic must account for both URL param and fallback-to-first behavior.
