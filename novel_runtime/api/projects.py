@@ -37,6 +37,15 @@ async def list_projects(
     return svc.list_projects(status)
 
 
+@router.delete("/{project_id}")
+async def delete_project(
+    project_id: str,
+    svc: ProjectService = Depends(get_service),
+):
+    ok = svc.delete_project(project_id)
+    return {"deleted": ok}
+
+
 @router.put("/{project_id}", response_model=Project)
 async def update_project(
     project_id: str,

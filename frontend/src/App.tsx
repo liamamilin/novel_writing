@@ -13,6 +13,7 @@ import { useUIStore } from './stores/uiStore';
 import { useProjectStore } from './stores/projectStore';
 import { useChapterStore } from './stores/chapterStore';
 import { useState, useEffect } from 'react';
+import { TokenModal } from './components/auth/TokenModal';
 
 const queryClient = new QueryClient();
 
@@ -25,10 +26,17 @@ function MainLayout() {
   const selectAsset = useUIStore((s) => s.selectAsset);
   const [activityOpen, setActivityOpen] = useState(false);
 
+  const [showTokenModal, setShowTokenModal] = useState(false);
   const clearChapters = useChapterStore((s) => s.clearChapters);
   const chapters = useChapterStore((s) => s.chapters);
   const setCurrentChapter = useChapterStore((s) => s.setCurrentChapter);
   const loadProjects = useProjectStore((s) => s.loadProjects);
+
+  useEffect(() => {
+    const handler = () => setShowTokenModal(true);
+    window.addEventListener('auth:required', handler);
+    return () => window.removeEventListener('auth:required', handler);
+  }, []);
 
   // B1 + N4 + N14: sync route param + load projects + clear stale selection
   useEffect(() => {
@@ -90,6 +98,8 @@ function MainLayout() {
         center={<CenterPanel />}
         right={<RightPanel />}
       />
+
+      {showTokenModal && <TokenModal onClose={() => setShowTokenModal(false)} />}
     </div>
   );
 }

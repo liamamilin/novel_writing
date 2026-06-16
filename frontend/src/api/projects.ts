@@ -8,4 +8,6 @@ export const projectsApi = {
     api.post<{ project_id: string; status: string }>('/projects', data),
   update: (id: string, data: Partial<Project>) =>
     api.put<Project>(`/projects/${id}`, data),
+  delete: (id: string) =>
+    api.delete<{ deleted: boolean }>(`/projects/${id}`),
 };

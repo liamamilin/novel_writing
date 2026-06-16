@@ -1,10 +1,11 @@
 import { api } from './client';
 
 export const exportApi = {
-  export: (pid: string, format: string, options?: { chapter_range?: string; include_title?: boolean }) =>
+  export: (pid: string, format: string, chapterRange?: string, includeTitle?: boolean) =>
     api.post<{ task_id: string; format: string; path: string }>(`/projects/${pid}/export`, {
       format,
-      ...options,
+      chapter_range: chapterRange,
+      include_title: includeTitle,
     }),
 };
 

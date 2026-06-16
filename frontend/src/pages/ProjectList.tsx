@@ -12,6 +12,22 @@ export function ProjectList() {
 
   useEffect(() => { loadProjects(); }, []);
 
+    const [deletingId, setDeletingId] = useState<string | null>(null);
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('确定删除此项目？此操作不可恢复！')) return;
+    setDeletingId(id);
+    try {
+      await projectsApi.delete(id);
+      await loadProjects();
+      notify('项目已删除', 'success');
+    } catch (e) {
+      notify((e as Error).message, 'error');
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const handleCreateDemo = async () => {
     setDemoLoading(true);
     try {
@@ -53,17 +69,26 @@ export function ProjectList() {
           <p className="text-gray-400 text-sm">暂无项目，点击上方按钮创建</p>
         )}
         {projects.map((p) => (
-          <button
-            key={p.project_id}
-            onClick={() => navigate(`/project/${p.project_id}`)}
-            className="w-full bg-white rounded shadow p-3 flex justify-between hover:bg-gray-50 text-left"
-          >
-            <div>
-              <span className="font-medium">{p.project_name}</span>
-              <span className="ml-2 text-sm text-gray-500">{p.genre}</span>
-            </div>
-            <span className="text-sm text-gray-400">{p.status}</span>
-          </button>
+          <div key={p.project_id} className="flex items-center bg-white rounded shadow hover:bg-gray-50 group">
+            <button
+              onClick={() => navigate(`/project/${p.project_id}`)}
+              className="flex-1 p-3 flex items-center justify-between text-left"
+            >
+              <div>
+                <span className="font-medium">{p.project_name}</span>
+                <span className="ml-2 text-sm text-gray-500">{p.genre}</span>
+              </div>
+              <span className="text-sm text-gray-400">{p.status}</span>
+            </button>
+            <button
+              onClick={(e) => { e.stopPropagation(); handleDelete(p.project_id); }}
+              disabled={deletingId === p.project_id}
+              className="p-3 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity disabled:opacity-50"
+              title="删除项目"
+            >
+              {deletingId === p.project_id ? '删除中...' : '🗑'}
+            </button>
+          </div>
         ))}
       </div>
     </div>

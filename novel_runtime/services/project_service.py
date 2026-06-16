@@ -84,3 +84,16 @@ class ProjectService:
 
     def get_project_path(self, project_id: str) -> Path:
         return self.project_storage.get_project_path(project_id)
+
+    def delete_project(self, project_id: str) -> bool:
+        project_path = self.get_project_path(project_id)
+        if not project_path.exists():
+            return False
+        import shutil
+        shutil.rmtree(project_path)
+        conn = self.db.get_connection()
+        conn.execute("DELETE FROM projects WHERE project_id = ?", (project_id,))
+        conn.execute("DELETE FROM tasks WHERE project_id = ?", (project_id,))
+        conn.commit()
+        conn.close()
+        return True

@@ -26,6 +26,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
   });
   if (res.status === 401) {
     localStorage.removeItem('nwr_token');
+    window.dispatchEvent(new CustomEvent('auth:required'));
   }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: res.statusText }));

@@ -15,6 +15,8 @@ const FORMATS = [
 
 export function ExportModal({ projectId, onClose }: ExportModalProps) {
   const [format, setFormat] = useState('txt');
+  const [chapterRange, setChapterRange] = useState('');
+  const [includeTitle, setIncludeTitle] = useState(true);
   const [loading, setLoading] = useState(false);
   const [taskId, setTaskId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ export function ExportModal({ projectId, onClose }: ExportModalProps) {
     setLoading(true);
     setError(null);
     try {
-      const res = await exportApi.export(projectId, format);
+      const res = await exportApi.export(projectId, format, chapterRange || undefined, includeTitle);
       setTaskId(res.task_id);
     } catch (e) {
       setError((e as Error).message);
@@ -59,6 +61,24 @@ export function ExportModal({ projectId, onClose }: ExportModalProps) {
             </label>
           ))}
         </div>
+
+        <label className="block text-sm text-gray-600 mb-1">章节范围（可选）</label>
+        <input
+          value={chapterRange}
+          onChange={(e) => setChapterRange(e.target.value)}
+          className="w-full border rounded px-2 py-1 text-sm mb-3"
+          placeholder="如: 1-10 或 1,3,5 （留空=全部）"
+        />
+
+        <label className="flex items-center gap-2 mb-4 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={includeTitle}
+            onChange={(e) => setIncludeTitle(e.target.checked)}
+            className="accent-blue-500"
+          />
+          <span className="text-sm text-gray-600">包含小说标题</span>
+        </label>
 
         {error && (
           <div className="text-red-600 text-sm mb-3 bg-red-50 px-3 py-2 rounded">{error}</div>
