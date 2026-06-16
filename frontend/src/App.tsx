@@ -29,14 +29,15 @@ function MainLayout() {
   const setCurrentChapter = useChapterStore((s) => s.setCurrentChapter);
   const loadProjects = useProjectStore((s) => s.loadProjects);
 
-  // B1 + N4: sync route param + load projects for left-panel dropdown
+  // B1 + N4 + N14: sync route param + load projects + clear stale selection
   useEffect(() => {
     loadProjects();
     if (id && (!currentProject || currentProject.project_id !== id)) {
       clearChapters();
+      selectAsset(null);
       selectProject(id);
     }
-  }, [id, currentProject, selectProject, clearChapters, loadProjects]);
+  }, [id, currentProject, selectProject, clearChapters, loadProjects, selectAsset]);
 
   // N1: restore chapter/asset from URL query after chapters load
   useEffect(() => {

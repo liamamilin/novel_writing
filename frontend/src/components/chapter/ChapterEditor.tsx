@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useEffect, useCallback, useRef, lazy, Suspense } from 'react';
 import { useChapterStore } from '../../stores/chapterStore';
 
 const MDEditor = lazy(() => import('@uiw/react-md-editor'));
@@ -26,6 +26,7 @@ export function ChapterEditor() {
   const notify = useUIStore((s) => s.notify);
   const [activeTab, setActiveTab] = useState<'plan' | 'draft' | 'final'>('draft');
   const [content, setContent] = useState('');
+  const [loadedContent, setLoadedContent] = useState('');
   const [saving, setSaving] = useState(false);
   const [contentLoading, setContentLoading] = useState(false);
   const isStreaming = useStreamStore((s) => s.isStreaming);
@@ -61,6 +62,9 @@ export function ChapterEditor() {
       .then((res) => {
         if (res.content) {
           setContent(res.content);
+          setLoadedContent(res.content);
+        } else {
+          setLoadedContent('');
         }
       })
       .catch(() => {})
@@ -95,17 +99,35 @@ export function ChapterEditor() {
     }
   }, [currentProject, currentChapter, content, isReadOnly, isStreaming, notify, loadChapters]);
 
-  // Ctrl+S to save
+  // N9: dirty state — warn on page leave
+  const isDirty = content !== loadedContent && !isReadOnly && !isStreaming;
+
+  useEffect(() => {
+    if (isDirty) {
+      const handler = (e: BeforeUnloadEvent) => {
+        e.preventDefault();
+        e.returnValue = '';
+      };
+      window.addEventListener('beforeunload', handler);
+      return () => window.removeEventListener('beforeunload', handler);
+    }
+  }, [isDirty]);
+
+  // N10: Ctrl+S to save (only when editor div is focused)
+  const editorContainerRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
       if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-        e.preventDefault();
-        handleSave();
+        const target = e.target as HTMLElement;
+        if (editorContainerRef.current && editorContainerRef.current.contains(target) && !isReadOnly && !isStreaming) {
+          e.preventDefault();
+          handleSave();
+        }
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [handleSave]);
+  }, [handleSave, isReadOnly, isStreaming]);
 
   const handleDraftSelect = useCallback((_draftId: number, _content: string) => {
     if (!showDiff) {
@@ -144,7 +166,7 @@ export function ChapterEditor() {
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-full flex flex-col" ref={editorContainerRef}>
       <div className="flex items-center justify-between mb-3">
         <h2 className="text-xl font-bold">
           第 {currentChapter.chapter_number} 章

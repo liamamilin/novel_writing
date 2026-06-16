@@ -26,6 +26,7 @@ export function ChapterList() {
   const [creating, setCreating] = useState(false);
   const [, setSearchParams] = useSearchParams();
   const isStreaming = useStreamStore((s) => s.isStreaming);
+  const clearStreamedContent = useStreamStore((s) => s.clearStreamedContent);
 
   useEffect(() => {
     if (currentProject) {
@@ -90,6 +91,7 @@ export function ChapterList() {
                 notify('正在流式生成中，请等待完成后再切换', 'error');
                 return;
               }
+              clearStreamedContent();
               setCurrentChapter(ch);
               selectAsset({ type: 'chapter', id: ch.chapter_id });
               setSearchParams({ ch: String(ch.chapter_number), asset: 'chapter' });

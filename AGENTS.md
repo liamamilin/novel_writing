@@ -88,7 +88,7 @@ docs/                 # Deployment guide
 ## Gotchas
 
 - Never pass a dict to `ProjectService.update_project()`; wrap in `ProjectUpdate(...)` first
-- Mock provider needs both `.generate.return_value` (str) and `.generate_with_usage.return_value` (tuple[str, dict]) — unset mock creates MagicMock and hangs
+- Mock provider needs both `.generate.return_value` (str) and `.generate_with_usage.return_value` (tuple[str, str]) — unset mock creates MagicMock and hangs
 - `Approved` chapters are read-only (frozen); `final.md` must exist before `StateService.update_state()`
 - The `compiler/` directory contains deterministic code; `agents/` contains LLM-driven code — don't confuse them
 - Adding a new API endpoint requires registering in `novel_runtime/main.py` with `app.include_router()`, adding to `api/__init__.py`, and adding to the AuthMiddleware exemption list if needed
@@ -99,3 +99,51 @@ docs/                 # Deployment guide
 - `StyleAsset()` is imported at module level in `chapters.py` — do NOT inline-import it inside the `event_stream()` closure to avoid NameError
 - `api/__init__.py` must export all routers — missing entries cause confusing import errors
 - `.env` must use `load_dotenv()` (top of `config.py`) instead of pydantic's `env_file=` to avoid `extra_forbidden` error with `LLM_API_KEY`
+
+## 57 API Endpoints (53 REST + 4 docs) — v2
+
+| Module | Count | Endpoints |
+|--------|-------|-----------|
+| Projects | 4 | POST/GET list, GET/PUT by id |
+| Styles | 5 | GET list, POST analyze, POST sample, GET by id, POST test-paragraph |
+| Bible | 7 | GET bible, POST direction/characters/generate/update, GET update-proposal/version |
+| Context | 1 | POST compile |
+| Chapters | **14** | GET list, POST plan/draft/stream/polish/review/multi-reader/approve, GET drafts/draft detail/content, POST content/promote, POST state/update |
+| State | 2 | POST rollback, GET snapshots |
+| Export | 2 | POST export, GET download |
+| Subplots | 4 | GET/POST list, GET suggestions, PUT by id |
+| Hooks | 6 | GET/POST list, GET by chapter, PUT by id, POST resolve/trigger |
+| Strategy | 3 | GET/PUT, POST reset |
+| Events | 1 | GET timeline |
+| Share | 1 | POST share link |
+| Shared | 3 | GET token/chapters/chapter detail (no auth) |
+| System | 2 | GET health (LLM latency probe), GET metrics |
+
+### Chapter API detail
+- `GET /{chapter_number}/content` — returns active draft content (or final for approved/locked)
+- `POST /{chapter_number}/content` — save user-edited text as new draft version; deduplicates saves < 60s into same version; if status=reviewed, reverts to drafted and marks reviews stale
+
+## SSE / Stream gotchas
+
+- SSE flow: `token` events → `done` event with `draft_id`. On done, backend auto-calls `ChapterService.finalize_streamed_draft()` which:
+  1. Parses the `---ANNOTATIONS---` YAML section (same format as sync draft) — no extra LLM call
+  2. Writes `state_annotations.yaml`
+  3. Runs contract check (deterministic substring match)
+  4. Sets chapter status to `drafted`
+- Streamed drafts are **identical** to sync `POST /draft` in terms of files produced
+- Cancelling stream mid-way loses partial content (no draft saved)
+- Stream disable chapter switching (ChapterList blocks onClick while `isStreaming`)
+
+## URL state / refresh
+
+- Chapter selection is persisted via URL query: `/project/:id?ch=3&asset=chapter`
+- On refresh, `MainLayout` reads `?ch` from URL and restores `currentChapter` + `selectedAsset`
+- `ProjectCreate` navigates to `?ch=1&asset=chapter` after Bible generation
+- `LeftPanel` project dropdown auto-loads from `useProjectStore.loadProjects()` on MainLayout mount
+
+## Save / dirty state
+
+- `POST /content` deduplicates: if last save was < 60s ago, overwrites same `active_draft_id` instead of creating new version
+- Saving a `reviewed` chapter reverts to `drafted` and renames `review_*.md` → `review_*.md.stale`
+- Editor tracks `isDirty` (content !== loadedContent); triggers `beforeunload` warning if dirty
+- Ctrl+S only fires when the editor container is focused (not globally)

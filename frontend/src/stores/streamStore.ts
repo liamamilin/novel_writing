@@ -9,6 +9,7 @@ interface StreamStore {
   streamedContent: string;
   streamDraft: (projectId: string, chapterNumber: number) => Promise<string>;
   cancelStream: () => void;
+  clearStreamedContent: () => void;
 }
 
 export const useStreamStore = create<StreamStore>((set) => {
@@ -68,8 +69,17 @@ export const useStreamStore = create<StreamStore>((set) => {
     },
 
     cancelStream: () => {
-      abortController?.abort();
+      if (!abortController) return;
+      abortController.abort();
+      const partial = useStreamStore.getState().streamedContent;
       set({ isStreaming: false });
+      if (partial.length > 0) {
+        try { useUIStore.getState().notify(`已停止，生成了约 ${partial.length} 字，未保存`, 'info'); } catch {}
+      }
+    },
+
+    clearStreamedContent: () => {
+      set({ streamedContent: '' });
     },
   };
 });
